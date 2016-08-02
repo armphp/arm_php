@@ -1,0 +1,9 @@
+{
+	"host" : "localhost", 
+	"server" : "localhost",
+	"name": "arm",
+	"user": "root",
+	"password": "",
+	"database":"iexclusive"
+	
+}

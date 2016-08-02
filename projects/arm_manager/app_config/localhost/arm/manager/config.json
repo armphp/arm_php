@@ -1,0 +1,17 @@
+
+{
+
+    "dev" 						: 1,
+    "folder_modules_config" 		: "arm_manager/modules/configs/private/",
+    "folder_request_controller" 	: "arm_manager/library/controller/",
+    "app_url" 					: "localhost/arm/manager/" ,
+    "root_url" 					: "localhost/arm/",
+    "app_path" 					: "arm_manager/",
+    "view_module_list" : {"html":"ARMSimplePHPResult", "json" 	: "ARMJsonViewModule" },
+    "temp_folder": "arm_manager_temp/",
+
+    "class_path_list" : [
+        "arm/",
+        "arm_manager/library/"
+    ]
+}

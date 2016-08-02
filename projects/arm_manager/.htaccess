@@ -1,0 +1,18 @@
+Options +FollowSymlinks
+
+RewriteEngine on
+SetEnvIf Request_URI /app_config/ isprivate=1
+SetEnvIf Request_URI /private/ isprivate=1
+Order Allow,Deny
+Allow from All
+Deny from env=isprivate
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{HTTP_HOST} localhost [NC]
+RewriteRule . /arm/index.php [L]
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{HTTP_HOST} !localhost [NC]
+RewriteRule . /arm_manager/index.php [L]
