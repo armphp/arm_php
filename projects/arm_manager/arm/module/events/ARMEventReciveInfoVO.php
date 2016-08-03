@@ -5,7 +5,7 @@
  * Date: 20/02/16
  */
 
-class ARMEventInfoVO {
+class ARMEventReciveInfoVO {
 	/**
 	 * simboliza a ordem da fila de vezes que o metodo já foi chamado
 	 * @var int
@@ -25,7 +25,10 @@ class ARMEventInfoVO {
 		$this->count = $count ;
 		$this->data = $data ;
 	}
-	public function getData(){
+	public function getData( $param = NULL ){
+		if($param){
+			return ARMDataHandler::getValueByStdObjectIndex( $this->data, $param ) ;
+		}
 		return $this->data ;
 	}
 	public function getCount(){

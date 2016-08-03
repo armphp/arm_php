@@ -1,0 +1,17 @@
+{
+
+  "dev" 						: 1,
+  "folder_modules_config" 		: "exemplos/private/config/",
+  "folder_request_controler" 	: "exemplos/private/controllers/",
+  "app_url" 					: "localhost/arm_php_events/" ,
+  "root_url" 					: "localhost/arm_php_events/",
+  "app_path" 					: "",
+  "view_module_list" : {"html":"ARMSimplePHPResult"},
+  "temp_folder": "exemplos/private/temp/",
+  "class_path_list" : [
+    "arm/",
+    "core/",
+    "library/",
+    "exemplos/"
+  ]
+}
