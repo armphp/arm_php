@@ -101,6 +101,24 @@ class ARMLogModule extends ARMBaseDataModuleAbstract{
 		}
 		return NULL ;
 	}
+	protected static $countAutoLog = 0 ;
+
+	/**
+	 * Para log simples de debug
+	 * @param $ob
+	 * @return ARMReturnDataVO|null
+	 * @throws ErrorException
+	 * @throws Exception
+	 */
+	public function addSimpleLog( $ob , $action = "simple.log", $action_label = "Log" ){
+		$logInfo = new ARMLogInfoVO();
+		$logInfo->data = $ob ;
+		$logInfo->action = $action ;
+		$logInfo->action_label = $action_label ;
+		$logInfo->ref_alias = "simple.log.count" ;
+		$logInfo->ref_id = self::$countAutoLog++ ;
+		return $this->addLog( $logInfo ) ;
+	}
 
 	/**
 	 * Pega os logs conforme o filtro na tabela configurada para essa instancia

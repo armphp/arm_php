@@ -37,8 +37,8 @@ class ARMListenerClassToInstanceInfoVO  extends ARMEventListenerInfoVO{
 		$className = "{$this->className}" ;
 		ARMClassIncludeManager::load( $this->className ) ;
 		$instance = new $className() ;
-		$methodName = "{$this->mehodName}" ;
-		$instance->$methodName($eventInfo) ;
+		$method = $this->methodName ;
+		$instance->{$method}($eventInfo);
 	}
 	/**
 	 * Override method

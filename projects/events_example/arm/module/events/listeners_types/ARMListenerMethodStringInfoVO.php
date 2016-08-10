@@ -21,6 +21,7 @@ class ARMListenerMethodStringInfoVO extends ARMEventListenerInfoVO {
 		if( !$this->methodName ){
 			return;
 		}
+		//para chamada de metodos estáticos
 		if ($this->className) ARMClassIncludeManager::load( $this->className ) ;
 		call_user_func( $this->methodName , $eventInfo ) ;
 	}

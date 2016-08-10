@@ -1,0 +1,8 @@
+{
+  "host"      : "localhost",
+  "server"    : "localhost",
+  "name"      : "exemplo arm",
+  "user"      : "root",
+  "password"  : "",
+  "database"  : "arm_exemplo"
+}

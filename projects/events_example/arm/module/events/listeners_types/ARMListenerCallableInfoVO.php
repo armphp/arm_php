@@ -19,7 +19,6 @@ class ARMListenerCallableInfoVO extends ARMEventListenerInfoVO{
 			return;
 		}
 		call_user_func($this->callebleMethod, $eventInfo) ;
-		dd( 1 ) ;
 	}
 	/**
 	 * Override method

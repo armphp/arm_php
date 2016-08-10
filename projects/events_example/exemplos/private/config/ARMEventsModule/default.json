@@ -1,0 +1,31 @@
+{
+  "dispatchSelfEvents" : false ,
+  "permitScheduleCronEvent" : true ,
+  "defaultListenersArmModule":[
+    {
+      "eventName":"testando.arm.module",
+      "className":"ARMLogModule" ,
+      "methodName":"addSimpleLog",
+      "moduleAlias" : "event"
+    }
+  ],
+  "defaultListenersStringMehodName":[
+    {
+      "eventName":"testando.debug",
+      "className":null ,
+      "methodName":"d"
+    },
+    {
+      "eventName":"testando.metodo.classe.estatica",
+      "className":"MinhaClasseSoltaNoMundo" ,
+      "methodName":"MinhaClasseSoltaNoMundo::meuMetodoEstatico"
+    }
+  ],
+  "defaultListenersClassToInstance":[
+    {
+      "eventName":"testando.metodo.da.classe",
+      "className":"MinhaClasseSoltaNoMundo" ,
+      "methodName":"metodoDaClasse"
+    }
+  ]
+}
