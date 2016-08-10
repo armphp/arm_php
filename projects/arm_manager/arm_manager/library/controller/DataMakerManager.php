@@ -8,7 +8,7 @@ class DataMakerManager {
 	protected $configToMake ;
 	/**
 	 * 
-	 * @var ARMMysqliConfigVO
+	 * @var ARMDbConfigVO
 	 */
 	protected $configConnection ;
 	
@@ -19,7 +19,7 @@ class DataMakerManager {
 	public function __construct(){
 
 		$this->configToMake 		= new ARMModelGatewayConfigToMakeVO() ;
-		$this->configConnection		= new ARMMysqliConfigVO() ;
+		$this->configConnection		= new ARMDbConfigVO() ;
 		$this->checkSavedValues() ;
 		
 		ARMDebug::ifPrint( $_SESSION , "maker") ;
@@ -102,9 +102,10 @@ class DataMakerManager {
 
 		//ARMDebug::print_r( $ResultConnection ) ;
 		if( $ResultConnection && $ResultConnection->testConnection()){
-			$ReturnResult->success = TRUE ;
-			$ReturnResult->addMessage( "Sucesso ao conectar" ) ;
-			return $ReturnResult ;
+				$ReturnResult->success = TRUE ;
+				$ReturnResult->addMessage( "Sucesso ao conectar" ) ;
+				return $ReturnResult ;
+			 
 		}
 		
 		$ReturnResult->addMessage( "Erro ao conectar com os dados enviados" ) ;

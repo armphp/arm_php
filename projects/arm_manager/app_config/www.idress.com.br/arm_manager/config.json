@@ -1,0 +1,17 @@
+
+{
+
+    "dev" 						: 1,
+    "folder_modules_config" 		: "arm_manager/modules/configs/private/",
+    "folder_request_controler" 	: "arm_manager/library/controller/",
+    "app_url" 					: "www.idress.com.br/arm_manager/" ,
+    "root_url" 					: "www.idress.com.br/arm_manager/",
+    "app_path" 					: "arm_manager/",
+    "view_module_list" : {"html":"ARMSimplePHPResult"},
+    "temp_folder": "arm_manager_temp/",
+
+    "class_path_list" : [
+        "arm/",
+        "arm_manager/library/"
+    ]
+}

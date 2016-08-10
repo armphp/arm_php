@@ -1,7 +1,7 @@
 <?php
 
 
-
+error_reporting( N );
 
 /**
  *
