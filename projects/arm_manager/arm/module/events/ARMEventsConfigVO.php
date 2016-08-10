@@ -1,14 +1,13 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: renato
+ * @author Renato Miawaki
  * Date: 20/02/16
  * Time: 22:18
  */
 
 class ARMEventsConfigVO extends ARMAutoParseAbstract{
 	/**
-	 * se true, o próprio módulo dispara eventos para caso alguém queira ouvir, tipo um log
+	 * se true, o próprio módulo dispara eventos para caso alguém queira ouvir, tipo um log, ótimo para debug
 	 * @var bool
 	 */
 	public $dispatchSelfEvents = false ;

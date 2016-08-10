@@ -1,23 +1,26 @@
 <?php
 /**
- * ARM Framework
+ * ARM PHP Framework
  * @author: Renato Seiji Miawaki
  * Date: 20/02/16
  *
  * Um event listener pode ser:
  *
- * MODE_ARMMODULE 			| um módulo do arm para fazer um getInstance
- * MODE_INSTANCE			| uma instancia de objeto com metodo
- * MODE_STRING_NAME			| um metodo passado como string do nome ou metodo statico passado como string
- * MODE_CALLABLE			| um metodo calleble
- * MODE_CLASS_TO_INSTANCE 	| um objeto para dar new e chamar o metodo
+ * ARMListenerArmModuleInfoVO		| um módulo do arm para fazer um getInstance
+ * ARMListenerInstanceInfoVO		| uma instancia de objeto com metodo
+ * ARMListenerMethodStringInfoVO	| um metodo passado como string do nome ou metodo statico passado como string
+ * ARMListenerCallableInfoVO		| um metodo calleble
+ * ARMListenerClassToInstanceInfoVO	| um objeto para dar new e chamar o metodo
  *
  */
+
+
 
 abstract class ARMEventListenerInfoVO extends ARMAutoParseAbstract{
 	public $eventName = "" ;
 	/**
-	 * @var
+	 * if not true, it does not execute the event
+	 * @var bool
 	 */
 	public $active = TRUE ;
 	/**
