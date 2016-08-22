@@ -11,23 +11,27 @@
  * @versao		: 1.1 (inglï¿½s)
  * @comentario	: listDirectory($urlOfDirectory) - metodo adicional para listar arquivos de um diretï¿½rio
  * @description	: 	Classe para auxilio na manipulaï¿½ï¿½o de dados.
- */
- /*
+ *
+ *
  * @autor		: Leandro Leal
  * @data		: 22/04/2014
  * @versao		: 1.2
  * @comentario	: Nova função  clearFolder para limpar os arquivos temporários da pasta temp e afins.
  *
- *
- */
-/*
  * @autor		: Renato Miawaki
  * @data		: 01/12/2015
  * @versao		: 1.3
  * @comentario	: novos metodos de tratamento de pastas
  *
  *
+ *
+ * @autor		: Renato Miawaki
+ * @data		: 22/8/2016
+ * @versao		: 1.4
+ * @comentario	: FIX bug createFolderIfNotExists
+ *
  */
+
 class ARMDataHandler extends ARMDataStringHandler {
 
 	
@@ -327,6 +331,14 @@ class ARMDataHandler extends ARMDataStringHandler {
 			self::createFolderIfNotExist($url);
 		}
 	}
+
+	/**
+	 * Cria uma pasta caso ela não exista com permissão enviada em parametro
+	 *
+	 * @param $url
+	 * @param int $mode
+	 * @throws ErrorException
+	 */
 	static function createFolderIfNotExist($url , $mode = 0775){
 		//fazer o upgrade para ser recursivo
 		if(!file_exists($url)){
@@ -334,14 +346,13 @@ class ARMDataHandler extends ARMDataStringHandler {
 			if( !$mkdir_success){
 				throw new ErrorException( "ARMDataHandler::createFolderIfNotExist - mkdir - permission denied- ". getcwd() . DIRECTORY_SEPARATOR . $url ) ;
 			}
-		}
-		if( !is_writable( $url ) ){
-			$chmod_success = @chmod($url, $mode);
-			if( !$chmod_success){
-				throw new ErrorException( "ARMDataHandler::createFolderIfNotExist - chmod - permission denied- ". getcwd() . DIRECTORY_SEPARATOR . $url ) ;
+			if( !is_writable( $url ) ){
+				$chmod_success = @chmod($url, $mode);
+				if( !$chmod_success){
+					throw new ErrorException( "ARMDataHandler::createFolderIfNotExist - chmod - permission denied- ". getcwd() . DIRECTORY_SEPARATOR . $url ) ;
+				}
 			}
 		}
-
 	}
 	
 	
