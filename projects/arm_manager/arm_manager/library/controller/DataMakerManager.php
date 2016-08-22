@@ -337,7 +337,8 @@ class DataMakerManager {
 		$instance = ARMMysqliModule::getInstaceByConfigVO( $this->configConnection , $this->getAliasByData() ) ;
 		ARMMysqliModule::setDefaultInstance( $instance ) ;
 		$Return->result = ARMModelGatewayMakerModule::makeByConfig( $this->configToMake ) ;
-		
+
+
 		$Return->driver_module = "ARMMysqliModule" ;
 		
 		return $Return ;

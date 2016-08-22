@@ -112,9 +112,101 @@ class ARMModelGatewayMakerModule extends ARMBaseModuleAbstract{
 			//ao tornar false, fica false pra sempre
 			$returnResultVO->success = ( ! $itemResult->success ) ? FALSE : $returnResultVO->success ;
 		}
-		
+		if($ConfigInfo->downloadZip){
+			$zipPath = ARMConfig::getInstance()->getTempFolder( ARMDataHandler::removeSpecialCharacters ($ConfigInfo->targetFolder ) ) ;
+			$zipName = "arm_models_".ARMDataHandler::removeSpecialCharacters($ConfigInfo->targetFolder)."_files.zip" ;
+			if( self::zip( $ConfigInfo->targetFolder, $zipPath.$zipName ) ){
+				self::downloadZip( $zipPath.$zipName , $zipName ) ;
+				unlink( $zipPath.$zipName ) ;
+				ARMDataHandler::deleteDirectory( $ConfigInfo->targetFolder ) ;
+				die;
+			}
+		}
 		$returnResultVO->result = $results;
 		return $returnResultVO ;
+	}
+	/**
+	 * @from: http://stackoverflow.com/questions/1334613/how-to-recursively-zip-a-directory-in-php
+	 * @param $source
+	 * @param $destination
+	 * @return bool
+	 */
+	public static function zip($source, $destination, $include_dir = false)
+	{
+
+		if (!extension_loaded('zip') || !file_exists($source)) {
+			return false;
+		}
+
+		if (file_exists($destination)) {
+			unlink ($destination);
+		}
+
+		$zip = new ZipArchive();
+		if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
+			return false;
+		}
+		$source = str_replace('\\', '/', realpath($source));
+
+		if (is_dir($source) === true)
+		{
+
+			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+
+			if ($include_dir) {
+
+				$arr = explode("/",$source);
+				$maindir = $arr[count($arr)- 1];
+
+				$source = "";
+				for ($i=0; $i < count($arr) - 1; $i++) {
+					$source .= '/' . $arr[$i];
+				}
+
+				$source = substr($source, 1);
+
+				$zip->addEmptyDir($maindir);
+
+			}
+
+			foreach ($files as $file)
+			{
+				$file = str_replace('\\', '/', $file);
+
+				// Ignore "." and ".." folders
+				if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+					continue;
+
+				$file = realpath($file);
+
+				if (is_dir($file) === true)
+				{
+					$zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+				}
+				else if (is_file($file) === true)
+				{
+					$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+				}
+			}
+		}
+		else if (is_file($source) === true)
+		{
+			$zip->addFromString(basename($source), file_get_contents($source));
+		}
+
+		return $zip->close();
+	}
+	protected static function downloadZip($zip_name, $file_name = ""){
+		if(!$file_name){
+			$file_name = basename($zip_name) ;
+		}
+		ob_get_clean();
+		header("Pragma: public");   header("Expires: 0");   header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header("Cache-Control: private", false);    header("Content-Type: application/zip");
+		header("Content-Disposition: attachment; filename=" . $file_name . ";" );
+		header("Content-Transfer-Encoding: binary");
+		header("Content-Length: " . filesize($zip_name));
+		readfile($zip_name);
 	}
 	/**
 	 * Metodo para criar DAO, VO e DataFacade de uma tabela
