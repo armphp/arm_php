@@ -307,7 +307,7 @@ class ARMModelGatewayMakerModule extends ARMBaseModuleAbstract{
 		/**
 		* @return {$className}VO
 		*/
-		function getLinkVO(){
+		function getVO(){
 			return new {$className}VO() ;
 		}
 		/**
