@@ -10,7 +10,7 @@ Deny from env=isprivate
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{HTTP_HOST} localhost [NC]
-RewriteRule . /arm/index.php [L]
+RewriteRule . /aeru_webservice/index.php [L]
 
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f

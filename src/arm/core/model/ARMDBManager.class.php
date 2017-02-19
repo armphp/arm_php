@@ -1,14 +1,10 @@
 <?php
 
-
-
-
 /**
  * This class grants access to all Db configured connections by slug or id
  * @author alanlucian
  *
  */
-
 class ARMDBManager extends ARMBasePoolManager{
 
 	
@@ -38,7 +34,7 @@ class ARMDBManager extends ARMBasePoolManager{
 			self::startLink( $config );
 		}
 		return $config->getLink() ; // $config->getLink();
-		
+
 	}
 	
 	public static function getByAlias( $alias ){
@@ -62,10 +58,7 @@ class ARMDBManager extends ARMBasePoolManager{
 		//ARMDebug::print_r( self::$dbConfigPool ) ;
 		return self::$dbConfigPool[ $alias ] ;
 	}
-	
-	
-	
-	
+
 	/**
 	 * 
 	 * @param ARMDbConfigInterface $config
@@ -76,33 +69,22 @@ class ARMDBManager extends ARMBasePoolManager{
 		
 		// Here we need do check if the DB driver is suported by the framework
 		if(  $config->getDriver()  !== self::DRIVER_MYSQLI ){
-			throw new ErrorException( "Driver de banco de dados não suportado" );
-			die ;
+			throw new ErrorException( "Driver de banco de dados não implementado" );
 		}
-		
-		try{
-			//start an DB link and pass it to the config instance
-			
-			//ARMDebug::li( "startLink :  {$config->getHost()} , {$config->getUser()}, {$config->getPassword()} , {$config->getDBName()} " ) ;
-			
-			$dbLink = new mysqli(  $config->getHost() , $config->getUser(), $config->getPassword() , $config->getDBName() ) ;
+		//start an DB link and pass it to the config instance
+		$dbLink = new mysqli(  $config->getHost() , $config->getUser(), $config->getPassword() , $config->getDBName() ) ;
 
+        // Força o charset com o setado no config
+        // Change character set like config if exists
 
+        if($config->getEncode()){
+            $dbLink->set_charset($config->getEncode());
+        }
 
+		if( $n = mysqli_errno( $dbLink ) ) {
+			throw new ErrorException( "db error ". $config->getPassword() ,$n ) ;
+		}
+		$config->setLink( $dbLink ) ;
 
-			if( mysqli_errno( $dbLink ) ) {
-				echo "erro de banco";
-				exit();
-			}
-			$config->setLink( $dbLink ) ;
-
-		} catch (Exception $e){
-			$ReturnResultVO->sucess  = FALSE;
-			$ReturnResultVO->addMessage($e);
-			echo "erro de conexao com o banco";
-			exit();
-		} // end try{
-		
 	}
-	
 }

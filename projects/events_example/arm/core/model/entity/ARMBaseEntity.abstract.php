@@ -1,32 +1,36 @@
 <?php
+
+/**
+ *
+ * Classe que representa uma entidade no banco de dados
+ * Class ARMBaseEntityAbstract
+ */
 abstract class ARMBaseEntityAbstract implements ARMEntityInterface{
 	
 	protected $array_parameter  	= array();
-	protected $relationStarted 		= FALSE;
 	protected $__denyMethods        = array();
 
+	/**
+	 * array of string
+	 * method names to ignore in toStdClass() method
+	 * @param $_denyMethods
+	 */
 	public function __addDenyMethods($_denyMethods){
 		$this->__denyMethods[] = $_denyMethods;
 	}
-
-
 	protected $VO ;
-	/**
-	 * @var ARMEntityRelationshipInterface[]
-	 */
-	protected $entityRelations ;
-	
+
 	function __construct(){
 		$this->startVO();
-		$this->__denyMethods[] = "getFieldData" ;
-		$this->__denyMethods[] = "getLinkVO" ;
+		$this->__addDenyMethods("getFieldData") ;
+		$this->__addDenyMethods("getVO") ;
 	}
 
 	protected function startVO(){
 		throw new ErrorException("Implemente startVO na ".get_called_class());
 	}
 	
-	public function commit( $validate = FALSE , $commitEntitys = FALSE) {
+	public function commit( $validate = FALSE ) {
 		$ReturnResultVO = new ARMReturnResultVO();
 		$ReturnResultVO->success = true ;
 		
@@ -42,16 +46,8 @@ abstract class ARMBaseEntityAbstract implements ARMEntityInterface{
 			$update = TRUE ;
 		}
 		if( $this->hasData() ){
-			
-// 			ARMDebug::print_r($this->getLinkVO() );
 			$this->getVO();
 			$this->commitVO( $this->VO, $this->getDAO() , $ReturnResultVO );
-			
-// 			ARMDebug::print_r($ReturnResultVO );
-			if( $commitEntitys ) {
-// 				var_dump("Commita os Relation");
-				$this->commitRelations( $ReturnResultVO, $validate , $update);
-			}
 		}
 		$ReturnResultVO->result = $this->VO;
 		return $ReturnResultVO;
@@ -66,88 +62,19 @@ abstract class ARMBaseEntityAbstract implements ARMEntityInterface{
 	}
 	
 	/**
-	 * 
+	 * verifica se tem data
 	 * @return boolean
 	 */
 	protected function hasData(){
 		//é false até que uma propriedade me diga o contrário
 		$return = FALSE;
-// 		$this->startVO();
-// ARMDebug::li( get_called_class() );
-// ARMDebug::print_r( $this );
 		foreach ( $this->VO as $key=>$value){
 			if( !is_null( $value ) )
 				return TRUE;
 		}
-		
 		return $return;
 	}
-	/**
-	 * Deve ser implementado para iniciar as relações
-	 * Tome o devido cuidado para não iniciar 2x a mesma relação
-	 * @return boolean
-	 */
-	protected function startRelations(){
-		if($this->hasRelations()){
-			return FALSE;
-		}
-		$this->entityRelations = array() ;
-		return TRUE;
-	}
-	/**
-	 * 
-	 * @param ARMReturnResultVO $ReturnResultVO
-	 * @param unknown $validate
-	 * @param Boolean $update  // passa pra relacao se foi um upadate ou um commit as relacoes 1-1 precisam saber  disso
-	 */
-	private function commitRelations(ReturnResultVO &$ReturnResultVO, $validate, $update){
-		
-		$primary_key_name = $this->getDAO()->getPrimaryKey() ;
-		
-		$this->startRelations();
-		if($this->hasRelations()){
-			foreach ( $this->entityRelations as $alias => $relation ){
-				
-// 				ARMDebug::li( "commitRelations >> " . $alias  );
-// 				ARMDebug::print_r( $relation ) ;
-				
-				// se
-// 				method_exists( $relation , "")
-				
-				
-				$commit_result = $relation->commit(  $this->VO->$primary_key_name, $validate );
-// 				ARMDebug::li( get_called_class() . __METHOD__. " commitou .. {$alias} . e ?");
-// 				var_dump( $commit_result );
-				if( $commit_result->success == FALSE ){
-					
-					$ReturnResultVO->success = FALSE ;
-					$ReturnResultVO->appendMessage( $commit_result->array_messages ) ;
-				}
-				
-			}
-			
-		}
-		return $ReturnResultVO;
-	}
-	/**
-	 * 
-	 * @param unknown $entityData
-	 * @return array
-	 */
-	private function getArrayOfEntityData($entityData){
-		if(is_array($entityData)){
-			return $entityData;
-		}
-		return array($entityData);
-	}
-	/**
-	 * 
-	 * @return boolean
-	 */
-	protected function hasRelations(){
-		return ($this->entityRelations && count($this->entityRelations) > 0);
-	}
-	
+
 	function setId(  $id , $autoSearch = TRUE ) {
 		
 		$var = ARMDataHandler::forceInt( $id );
@@ -156,59 +83,40 @@ abstract class ARMBaseEntityAbstract implements ARMEntityInterface{
 			$var = NULL;
 		$this->startVO();
 		$this->VO->id = $var;
-		
-		
+
 		if( $autoSearch ){
 			$return = $this->autoSearch();
 			return $return ;
 		}
 		return NULL;
 	}
-	
-	
+
 	public function fetchArray($array, $prefix = ""){
 		if(!$this->VO){
 			$this->startVO();
-			//se não tem vo setada, da erro mesmo  ??
-// 			return;
 		}
-		
-// 		ARMDebug::li( get_called_class() . " " . __METHOD__  . " PRefix: $prefix ");
-// 		ARMDebug::print_r( $this->VO );
-		
 		foreach($this->VO as $key=>$value){
 			$method = ARMDataHandler::urlFolderNameToMethodName("set_".$key);
 			$newValue = ARMDataHandler::getValueByArrayIndex($array, $prefix.$key);
-			
-// 			ARMDebug::li( get_called_class() . __METHOD__ . " FAzendo o fetch   $key => $value  new= $newValue  "  . $method) ;
-			
+
 			//se está dando um fetch mas o objeto já tem dados não sobreescreve com NULL o que já tem
 			if( is_null( $newValue ) && !is_null($value) )
 				continue;
-			
+
 			//se tem um set ele chama o metodo da entity
 			if( method_exists( $this, $method ) ){
-// 				ARMDebug::print_r( get_called_class() . __CLASS__. "?? $method $newValue ?");
 				if( $method == "setId" ){
 					$this->$method( $newValue , FALSE );
 				}else{
 					$this->$method( $newValue );
 				}
-// 				ARMDebug::print_r( get_called_class() . __CLASS__. "?? $method $newValue ?");
 				continue;
 			}
 			//se não tem set, seta direto na VO
 			$this->VO->$key = $newValue;
 		}
-		
-		$this->startRelations();
-		
-		$this->fetchArrayRelations( $array ) ;
 	}
 	public function fetchObject($obj){
-// 		echo  get_called_class() .  __METHOD__;
-// 		var_dump( $obj );
-		
 		$this->getVO();
 		if(!$this->VO){
 			return;
@@ -225,64 +133,7 @@ abstract class ARMBaseEntityAbstract implements ARMEntityInterface{
 		}
 		$this->VO = $std_VO;
 	}
-	
-	/**
-	 * @param string $alias
-	 * @param ARMBaseARMEntityRelationship $relation
-	 */
-	protected function addRelationShip( $alias, ARMBaseARMEntityRelationship $relation){
-		if(isset($this->entityRelations[$alias])){
-			throw new ErrorException("Relação repetida");
-		}
-		$this->entityRelations[$alias] = $relation;
-	}
-	/**
-	 * 
-	 * @param string $alias
-	 * @return ARMBaseARMEntityRelationship
-	 */
-	protected function getRelationShipByAlias($alias){
-		if(!isset($this->entityRelations[$alias])){
-			throw new ErrorException("Relação não existe");
-		}
-		return $this->entityRelations[$alias];
-	}
-	
-	/**
-	 *
-	 * @param string $alias
-	 * @return object 
-	 */
-	protected function getRelationData( $alias ){
-		return $this->entityRelations[ $alias ]->getData();
-	}
-	
-	/**
-	 * 
-	 * @param string $alias
-	 * @return ARMBaseDataModuleAbstract
-	 */
-	protected function getRelationModule( $alias ){
-		return $this->entityRelations[ $alias ]->getModule();
-	}
-	
-	protected function fetchArrayRelations( $array_data ){
 
-// 		ARMDebug::li( get_called_class()  . " FN: fetchArrayRelations called " . get_called_class());
-// 		var_dump( $array_data );
-		
-		$this->startRelations();
-		
-		if( $this->hasRelations() && count($array_data) ){
-			foreach( $this->entityRelations as $alias => &$relation ){
-// 				ARMDebug::li(" FN: fetchArrayRelations foreach " .  $alias);
-// 				ARMDebug::print_r( $array_data );
-				$relation->fetchArray( $array_data , $alias ) ;
-				
-			}
-		}
-	}
-	
 	protected function autoSearch(){
 		$retorno = $this->setVoById( $this->VO->id , $this->VO, $this->getDAO() ) ;
 		$this->fetchObject( $this->VO );
@@ -293,8 +144,7 @@ abstract class ARMBaseEntityAbstract implements ARMEntityInterface{
 		$resut->success = true ;
 		return $resut ;
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param mixed $VO // pode ser um array de VO
@@ -311,10 +161,7 @@ abstract class ARMBaseEntityAbstract implements ARMEntityInterface{
 			
 		} else {
 			$ReturnDataVO = $DAO->$DAOMethodName( $VO ) ;
-// 			ARMDebug::li( get_called_class() . " . " . __METHOD__ . __LINE__ . " >>> " . $DAOMethodName);
-// 			ARMDebug::print_r($ReturnDataVO );		
 		}
-
 		
 		$ReturnResultVO->appendMessage( $this->resultHandler( $ReturnDataVO )->array_messages );
 		
@@ -324,16 +171,13 @@ abstract class ARMBaseEntityAbstract implements ARMEntityInterface{
 		}
 		return TRUE ;
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param ARMReturnDataVO $ReturnDataVO
 	 * @return ARMReturnResultVO
 	 */
 	public function resultHandler( ARMReturnDataVO $ReturnDataVO ){
-
-		
 		 	$return = new ARMReturnResultVO();
 		 	$return->success = $ReturnDataVO->success ;
 		 	$return->result = $ReturnDataVO->result ;
@@ -439,31 +283,17 @@ abstract class ARMBaseEntityAbstract implements ARMEntityInterface{
 		return $arrayMethods ;
 	}
 	/**
+	 *
 	 * método que retorna 
 	 * @return array
 	 */
 	public function getFieldData( $alias = "" ){
 		$return = array();
-		$this->startRelations();
 		$VO = $this->toStdClass();
-		
 		foreach( $VO as $key => $value ){
 			$return[$alias . $key ] =  new FormFieldInfoVO( $alias . $key , $value ); 
 		}
-		
-// 		ARMDebug::ifLi( get_called_class() . " " . __METHOD__ . " " . __LINE__ );
-// 		ARMDebug::ifPrint( $return  );
-		
-		if( !$this->hasRelations() )
-			return (object) $return ;
-		foreach ( $this->entityRelations as $alias => $relation ){
-
-			/* @var ARMEntityRelationshipInterface $relation  */
-			$return = array_merge( $return, $relation->getFields( $alias ) );
-			
-		}
-		return (object) $return;
-		
+		return (object) $return ;
 	}
 	
 }

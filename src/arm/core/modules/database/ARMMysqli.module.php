@@ -1,14 +1,11 @@
 <?php
 /*
- * @author		: Mauricio Amorim
+ * @author		: Renato Miawaki
  * @data		: 14/11/2010
- * @version		: 0.1
- * @description	: 	Classe para conexões com o banco de dados mysql
- Essa classe precisa que tenha um link de conexão com o banco aberta
- para evitar abrir conexões constantemente
+ * @version		: 1.0
+ * @description	: 	Classe para conexões com o banco de dados mysqli
  */
 
-//@TODO: Precisa implementar uma interface que tenha os metodos que ele já tem
 class ARMMysqliModule extends ARMBaseModuleAbstract {
 	//confirmado
 	const RETURN_STD_OBJECT							= "STR_OBJECT";
@@ -69,6 +66,11 @@ class ARMMysqliModule extends ARMBaseModuleAbstract {
 		}
 		$result = parent::getInstance( $alias );
 
+
+		# Bootstraping the awesomeness!!
+		EloquentBootstrap::create($result->_config);
+
+
 		return $result ;
 	}
 	/**
@@ -80,7 +82,7 @@ class ARMMysqliModule extends ARMBaseModuleAbstract {
 	public function setConfig( $ob ){
 		
 		$ob->alias = $this->__alias ;
-		//ARMDebug::print_r( $ob ) ; 
+
 		parent::setConfig( $ob ) ;
 		
 		//se ainda não tiver um config salvo com esse alias no pull, coloca
@@ -91,10 +93,13 @@ class ARMMysqliModule extends ARMBaseModuleAbstract {
 	/**
 	 * override
 	 * @param object $configResult
-	 * @return ARMDbConfigVO
+	 * @return ARMMysqliConfigVO
 	 */
 	public function getParsedConfigData( $configResult ){
-		$dbConfig = new ARMDbConfigVO();
+		if(!$configResult) {
+			throw new Exception("No database configured", 1) ;
+		}
+		$dbConfig = new ARMMysqliConfigVO();
 		$configResult->alias = $this->__alias ;
 		$dbConfig = ARMDataHandler::objectMerge( $dbConfig , $configResult , TRUE , TRUE ) ;
 
@@ -139,7 +144,7 @@ class ARMMysqliModule extends ARMBaseModuleAbstract {
 	 * @return boolean
 	 */
 	public function testConnection(){
-		if ( ARMDBManager::getConn( $this->__alias ) ){
+		if ( @ARMDBManager::getConn( $this->__alias ) ){
 			return TRUE ;
 		}
 		
@@ -210,7 +215,6 @@ class ARMMysqliModule extends ARMBaseModuleAbstract {
 	public function query( $query ){
 		if( $this->saveResult ){
 			//@TODO: verificar se compensa usar o cache direto na query
-			//aqui retornaria já os dados em cache
 		}
 		self::$count_querys++;
 		$link = ARMDBManager::getConn( $this->__alias ) ;
@@ -225,19 +229,15 @@ class ARMMysqliModule extends ARMBaseModuleAbstract {
 		try{
 			
 			$result = mysqli_query( $link, $query );
-			
-			ARMDebug::ifLi($query , "sql");
-			
+
 			$erro_number = mysqli_errno($link);
-			
+			//if error, return number in result
 			if($erro_number){
 				$returnResult = new ARMReturnDataVO(FALSE, mysql_error(), $erro_number, $query );
-				ARMDebug::ifPrint( $returnResult , "sql_error") ;
 			}else{
 				$returnResult = new ARMReturnDataVO(TRUE, $result, NULL, $query );
 				$returnResult->setReturnId( $link->insert_id ) ;
 			}
-			ARMDebug::ifPrint( $returnResult , "sql") ;
 			if( $this->saveResult ){
 				//@TODO: verificar se compensa usar o cache direto na query
 				//;cache não implementado
@@ -247,6 +247,7 @@ class ARMMysqliModule extends ARMBaseModuleAbstract {
 			}
 			return $returnResult;
 		} catch (Exception $e){
+			$ReturnDataVO = new ARMReturnDataVO();
 			$ReturnDataVO->success  = FALSE;
 			$ReturnDataVO->setResult( $e ) ;
 			$ReturnDataVO->code_return = mysql_errno();

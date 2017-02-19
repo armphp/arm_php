@@ -7,8 +7,33 @@
  *
  * @author renatomiawaki
  *
+ * Upgrade! Agora evitando loop utilizando session para quando se usa o metodo de pegar content por get_file_contents.
+ * Pois se a pessoa configurar errado e apontar para a própria pasta e cair de novo na view que faz a chamada, ele poderia travar o sistema
+ * @version 1.1
+ *
+ *
  */
 class ARMSimplePHPResult extends ARMBaseModuleAbstract implements ARMViewResolverInterface {
+
+
+    public function hasLogin(){
+
+//        try{
+//            BetterDev\AccountClientSDK\AccountApiClientUser::getToken();
+//        }
+//        catch (Exception $e){
+//            BetterDev\AccountClientSDK\AccountApiClientUser::getSession()
+//        }
+
+        if(!UserInfoSession::isAlive() ){
+            $redirect = ARMNavigation::getAppUrl() ;
+            $url = AccountManagerModule::getInstance()->getRedirectUrlToAccount() ;
+            ARMNavigation::redirect($url, TRUE);
+            return false ;
+        }
+
+        return true;
+    }
 
     /**
      * exibe as mensagens do ARMReturnResultVO com estilo
@@ -17,6 +42,14 @@ class ARMSimplePHPResult extends ARMBaseModuleAbstract implements ARMViewResolve
      * @throws ErrorException
      */
     public function show( $result , $arrayPathFolder ){
+
+        if (!$this->hasLogin()){
+            throw new Exception('Sem informações de login');
+        }
+
+		$code = ARMDataHandler::forceInt( ARMDataHandler::getValueByStdObjectIndex( $result , "code" ) ) ;
+
+		//d($arrayPathFolder);
         $HtmlResult = $result ;
         ARMDebug::ifPrint( $this->getFolderView() , "arm_view" );
         $searchFileResult 			= ARMFileFinder::searchByFolder( $this->getFolderView() , $arrayPathFolder ) ;
@@ -26,7 +59,10 @@ class ARMSimplePHPResult extends ARMBaseModuleAbstract implements ARMViewResolve
         $FOLDER_VIEW 				= $this->getFolderView() ;
 
         $APP_URL 					= ARMConfig::getDefaultInstance()->getAppUrl() ;
-
+        if( $code != 200 ){
+			//deu erro, exibe o erro
+			dd( $result ) ;
+		}
         $CURRENT_CONTROLLER_URL 	= ARMNavigation::getCurrentControllerURL() ;
 		ARMDebug::ifLi( "folder view $FOLDER_VIEW " , "arm_view") ;
 		ARMDebug::ifLi( "app url  $APP_URL " , "arm_view") ;
@@ -76,8 +112,32 @@ class ARMSimplePHPResult extends ARMBaseModuleAbstract implements ARMViewResolve
         return $config ;
     }
 
+	/**
+	 * Para funcionar precisa iniciar a session antes de chamar esse metodo
+	 * @return bool
+	 */
+	public static function isLoop(){
+		if(!session_id()){
+			//não tem como saber sem session
+			return ;
+		}
+		$total = ARMSession::getVar("ARM_SIMPLE_PHP_RESULT_LOOP_COUNT");
+		if(!$total){
+			$total++;
+			ARMSession::setVar("ARM_SIMPLE_PHP_RESULT_LOOP_COUNT", $total) ;
+		}
+		if($total > 50){
+			return TRUE;
+		}
+		return FALSE;
+	}
     public static function getPageResult( $project_folder ){
-        echo file_get_contents( ARMConfig::getDefaultInstance()->getAppUrl() . $project_folder ) ;
+		if(self::isLoop()){
+			return "loop";
+		}
+
+		$url = ARMConfig::getDefaultInstance()->getAppUrl() . $project_folder ;
+		echo file_get_contents( $url ) ;
         return ;
 
 
@@ -125,4 +185,4 @@ class ARMSimplePHPResult extends ARMBaseModuleAbstract implements ARMViewResolve
     }
 
 
-} 
+}

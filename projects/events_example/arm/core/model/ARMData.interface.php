@@ -2,18 +2,19 @@
 
 /**
  * Interface para todo tipo de classe que pretende tratar dados, seja do banco, api ou outro tipo de tecnica
- * 
+ *
  * @author renatomiawaki
  *
  */
-interface ARMDataInterface extends ARMSingletonInterface{
-	
+interface ARMDataInterface extends ARMSingletonInterface
+{
+
 	/**
 	 * faz o update ou insert conforme necessario
 	 * @param object $VO
 	 */
-	function commitVO( &$VO );
-	
+	function commitVO(&$VO);
+
 	/**
 	 *
 	 * Caso envie o objeto com mais parametros, ele dá erro.
@@ -25,8 +26,8 @@ interface ARMDataInterface extends ARMSingletonInterface{
 	 * @throws Exception
 	 * @return ARMReturnDataVO
 	 */
-	function insertVO( &$VO );
-	
+	function insertVO(&$VO);
+
 	/**
 	 *
 	 * Caso envie o objeto com mais parametros, ele dá erro.
@@ -38,23 +39,27 @@ interface ARMDataInterface extends ARMSingletonInterface{
 	 * @throws Exception
 	 * @return ARMReturnDataVO
 	 */
-	function updateVO( $VO );
+	function updateVO($VO);
+
 	/**
 	 * @param  int $id
 	 * @return ARMReturnDataVO
 	 */
 	function active($id);
+
 	/**
 	 * @param  int $id
 	 * @return ARMReturnDataVO
 	 */
 	function deactive($id, $field_name = "id");
+
 	/**
 	 * deleta mesmo
 	 * @param  int $id
 	 * @return ARMReturnDataVO
 	 */
 	function delete($id, $field_name = "id");
+
 	/**
 	 * deleta utilizando TODAS as propriedades não nulas da VO enviada como WHERE
 	 *
@@ -63,12 +68,13 @@ interface ARMDataInterface extends ARMSingletonInterface{
 	 * @return ARMReturnDataVO
 	 */
 	function deleteByVO($VO, $limit = NULL);
+
 	/**
 	 * @param $id number
 	 * @return class ARMReturnDataVO
 	 */
 	function selectById($id);
-	
+
 	/**
 	 *
 	 * @param object $VO
@@ -78,5 +84,5 @@ interface ARMDataInterface extends ARMSingletonInterface{
 	 * @throws Exception
 	 * @return ARMReturnDataVO
 	 */
-	function selectByVO( $VO, $limit = NULL, $offset = NULL);
+	function selectByVO($VO, $limit = NULL, $offset = NULL);
 }

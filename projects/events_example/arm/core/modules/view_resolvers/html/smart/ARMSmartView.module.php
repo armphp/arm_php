@@ -71,7 +71,6 @@ class ARMSmartViewModule extends ARMBaseModuleAbstract implements ARMViewResolve
 		}
 
 		//Search and uses an valid CommonData class
-
 		$BaseContentViewVO->common_view_data = ARMSmartCommonDataManager::getData( $this->_config , $arrayPathFolder , $BaseContentViewVO->data )  ;
 
 
@@ -118,7 +117,7 @@ class ARMSmartViewModule extends ARMBaseModuleAbstract implements ARMViewResolve
 // 		@TODO:   em dev pegar tipos e tipar tudo na view p/ facilitar a programacao
 //		@TODO: escrebe na view os comentarios necessarios
 		/* @var $this ARMSmartViewModule */
-		//li(">>>>".$ViewFile);
+
 		ARMClassIncludeManager::loadByFile( $ViewFile , $includeFile = FALSE );
         $result = $BaseContentViewVO ;
         $result->controller_result = $BaseContentViewVO->data->result;

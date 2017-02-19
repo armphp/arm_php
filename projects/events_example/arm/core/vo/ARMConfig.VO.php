@@ -12,7 +12,14 @@ class ARMConfigVO extends ARMAutoParseAbstract{
 	 * @var bool
 	 */
 	public $view_resolver_by_path = FALSE ;
-	
+
+	/**
+	 * Diz se deve estourar os erros ou devolvelos para a camada de View tratar
+	 * @var bool
+	 */
+	public $throwErrors = TRUE ;
+
+
 	/**
 	 * 
 	 * @var string
@@ -107,7 +114,7 @@ class ARMConfigVO extends ARMAutoParseAbstract{
 	 *
 	 * @var string
 	 */
-	public $folder_request_controler;
+	public $folder_request_controller;
 	
 	
 	public $app_url	;

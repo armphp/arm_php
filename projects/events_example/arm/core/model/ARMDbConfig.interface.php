@@ -39,6 +39,7 @@ interface ARMDbConfigInterface extends ARMManagerItemInterface{
 	 */
 	function getDBName();
 
+    function getEncode();
 	
 	/**
 	 * 

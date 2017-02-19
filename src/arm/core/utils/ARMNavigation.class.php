@@ -16,6 +16,14 @@
 	 * 					e a ARMNavigation::getVar($variavel); retorna também o que esta no arrayVariable \
 	 * 					que é resultado do arrayRestFolder, que agora também faz parte do ARMNavigation
 	 */
+	/**
+	 * @author		: Renato Miawaki
+	 * @data		: 16/12/2016
+	 * @version		: 1.4
+	 * @description	: 	Agora a arrayVariable fica guardado na ARMNavigation de forma estática
+	 * 					e a ARMNavigation::getVar($variavel); retorna também o que esta no arrayVariable \
+	 * 					que é resultado do arrayRestFolder, que agora também faz parte do ARMNavigation
+	 */
 class ARMNavigation{
 	const REDIRECT_VAR	= "SESSION_REDIRECT_VAR";
 	const URI_RETURN_TYPE_STRING	= "URI_RETURN_TYPE_STRING";
@@ -143,11 +151,17 @@ class ARMNavigation{
 		}
 		if(ARMNavigation::post($variable) != NULL){
 			return ARMNavigation::post($variable);
-		} else if(ARMNavigation::get($variable) != NULL){
-			return ARMNavigation::get($variable);
-		} else {
-			return $defaultValue ;
 		}
+		if(ARMNavigation::get($variable) != NULL) {
+			return ARMNavigation::get($variable);
+		}
+		if (isset($_SERVER["CONTENT_TYPE"]) && $_SERVER["CONTENT_TYPE"] == 'application/json') {
+			$inputs = (array)json_decode(file_get_contents('php://input'));
+			if (isset($inputs[$variable])) {
+				return $inputs[$variable];
+			}
+		}
+		return $defaultValue ;
 	}
 	/**
 	 * retorna uma array relacional para troca de caracteres e formação de nome entre url e Classes
@@ -251,7 +265,8 @@ class ARMNavigation{
 	static function getURI($siteName = "", $ReturnType = ARMNavigation::URI_RETURN_TYPE_ARRAY, $maxRange = NULL, $initRange = 0, $byVariable = NULL){
 		ARMDebug::ifPrint($siteName, "debug_navigation") ;
 		// @UPGRADE!
-		$siteName = str_replace(array("http://www", "https://www", "http://", "https://", "//"), "", $siteName);
+		$siteName = str_replace(array(//"http://www", "https://www",
+			"http://", "https://", "//"), "", $siteName);
 		ARMDebug::ifPrint($siteName, "debug_navigation") ;
 		$siteName = str_replace( $_SERVER["SERVER_NAME"] , "", $siteName);
 		ARMDebug::ifPrint($siteName, "debug_navigation") ;
@@ -259,6 +274,9 @@ class ARMNavigation{
 		$siteName = ARMDataHandler::removeLastBar($siteName);
 		$siteName = ARMDataHandler::removeFirstChar( $siteName , "/") ;
 		ARMDebug::ifPrint($siteName, "debug_navigation") ;
+		if(isset($_GET["debug_navigation"])){
+			d($_SERVER["REQUEST_URI"] ) ;
+		}
 		if($byVariable){
 			$url = explode("/", self::rewrite( ARMNavigation::get($byVariable) ));
 		} else {
@@ -268,8 +286,8 @@ class ARMNavigation{
 				$request_uri = $request_uri[0];
 			}
 
-
 			$url = str_ireplace($siteName, "", $request_uri );
+
 			//$url = explode("/", $url);
 
 		}
@@ -369,4 +387,22 @@ class ARMNavigation{
         header("Location:" . $path  );
         exit;
     }
+
+	public static function body($asArray = true)
+	{
+		$input = file_get_contents('php://input');
+		$request = json_decode($input, $asArray);
+
+		if ($request == null && $asArray) {
+			return [];
+		}
+
+		return $request;
+	}
+
+	public static function response($data, $status = 200)
+	{
+		http_response_code($status);
+		return $data;
+	}
 }

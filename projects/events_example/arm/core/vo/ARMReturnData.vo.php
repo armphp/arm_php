@@ -123,13 +123,26 @@ class ARMReturnDataVO{
 	 * @var object[]
 	 */
 	public $entities_std ;
-	public function fetchAllEntityToStd( ARMModelGatewayInterface $Gateway ){
+	public function fetchAllEntityToStd( ARMModelGatewayInterface $Gateway, $array_methods_values_to_set = NULL ){
 		if(!$this->entities_std){
 			$temp_result = array();
 			$this->fetchAll();
+			$methods_values_to_set = null ;
+			if( $array_methods_values_to_set && is_array($array_methods_values_to_set) && count($array_methods_values_to_set) > 0 ){
+				$methods_values_to_set = [] ;
+				//tem metodos para chamar e setar/passar valores, mas verificar se existem esse metodos na entity
+				$tempEntity = $Gateway->getEntity();
+				foreach( $array_methods_values_to_set as $method => $value ){
+					if( ARMClassHandler::hasMethod( $tempEntity, $method ) ){
+						$methods_values_to_set[$method] = $value ;
+					}
+				}
+			}
 			for($i = 0; $i < count( $this->result_fetch_object ); $i++){
 				$tempVO = $Gateway->getEntity();
-
+				foreach( $methods_values_to_set as $method => $value ){
+					$tempVO->$method( $value ) ;
+				}
 				$tempVO->fetchObject( $this->result_fetch_object[$i] );
 				$temp_result[] = $tempVO->toStdClass();
 			}

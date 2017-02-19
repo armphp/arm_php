@@ -20,11 +20,11 @@ class ARMSmartViewControllerManager {
 		$ViewControllerFile = ARMFileFinder::searchByFolder( $configVO->getViewControllerFolder() , $arrayPathFolder, NULL , ".php" , TRUE) ;
 
 
-		ARMDebug::ifPrint (__CLASS__ . "  ViewControllerFile  que deveria existir em: ". $ViewControllerFile, ARMSmartViewModule::DEBUG_VAR );
+//		ARMDebug::ifPrint (__CLASS__ . "  ViewControllerFile  que deveria existir em: ". $ViewControllerFile, ARMSmartViewModule::DEBUG_VAR );
 
 
 
-		//li(" ~>". ARMDataHandler::removeDoubleBars( $configVO->getViewControllerFolder()  . "/" . $configVO->defaultViewController . ".class.php" ) ) ;
+
 		if( !$ViewControllerFile  ){
 			if( ARMClassIncludeManager::loadByFile( ARMDataHandler::removeDoubleBars( $configVO->getViewControllerFolder()  . "/" . $configVO->defaultViewController . ".class.php" ) ) ){
 				$ViewControllerInstance  = new $configVO->defaultViewController() ;

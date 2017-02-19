@@ -11,7 +11,7 @@
  *
  * User: renatomiawaki
  * Date: 12/9/13
- * 
+ *
  */
 
 class ARMLogModule extends ARMBaseDataModuleAbstract{
@@ -74,6 +74,29 @@ class ARMLogModule extends ARMBaseDataModuleAbstract{
 	}
 
 	/**
+	 * Adiciona log sem precisar criar objeto
+	 *
+	 * @param $title
+	 * @param $description
+	 * @param string $ref_alias
+	 * @param int $ref_id
+	 * @param int $user_id
+	 * @return ARMReturnDataVO|null
+	 * @throws ErrorException
+	 * @throws Exception
+	 */
+	public function addQuickLog( $title, $description , $ref_alias = "", $ref_id = 0, $user_id = 0){
+		$log = new ARMLogInfoVO();
+		$log->action = "quick";
+		$log->action_label = $title ;
+		$log->data = $description ;
+		$log->ref_alias = $ref_alias ;
+		$log->ref_id = $ref_id;
+		$log->user_id = $user_id ;
+        $log->data_resolver_class = "";
+		return $this->addLog( $log ) ;
+	}
+	/**
 	 * @param ARMLogInfoVO $ARMLogInfoVO
 	 * @param bool $autoCreateTable
 	 * @return ARMReturnDataVO|null
@@ -83,8 +106,11 @@ class ARMLogModule extends ARMBaseDataModuleAbstract{
 		$VO = ArmLogModelGateway::getInstance()->getVO() ;
 
 		$VO->parseObject( $ARMLogInfoVO ) ;
-		$VO->date_in        = ARMMysqliModule::DATA_NOW ;
-		$VO->data           = ( !is_string( $ARMLogInfoVO->data ) ) ? json_encode( $ARMLogInfoVO->data ) : $ARMLogInfoVO->data ;
+
+        $date_in = date('Y-m-d h:i:s');
+		$VO->date_in  = $date_in;
+		$VO->data     = ( !is_string( $ARMLogInfoVO->data ) ) ? json_encode( $ARMLogInfoVO->data ) : $ARMLogInfoVO->data ;
+        $VO->id = null;
 
 		try{
 			return $this->_daoInstance->insertVO( $VO ) ;
@@ -100,24 +126,6 @@ class ARMLogModule extends ARMBaseDataModuleAbstract{
 			throw $e ;
 		}
 		return NULL ;
-	}
-	protected static $countAutoLog = 0 ;
-
-	/**
-	 * Para log simples de debug
-	 * @param $ob
-	 * @return ARMReturnDataVO|null
-	 * @throws ErrorException
-	 * @throws Exception
-	 */
-	public function addSimpleLog( $ob , $action = "simple.log", $action_label = "Log" ){
-		$logInfo = new ARMLogInfoVO();
-		$logInfo->data = $ob ;
-		$logInfo->action = $action ;
-		$logInfo->action_label = $action_label ;
-		$logInfo->ref_alias = "simple.log.count" ;
-		$logInfo->ref_id = self::$countAutoLog++ ;
-		return $this->addLog( $logInfo ) ;
 	}
 
 	/**

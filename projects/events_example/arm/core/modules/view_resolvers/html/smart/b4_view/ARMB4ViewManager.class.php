@@ -47,7 +47,7 @@ class ARMB4ViewManager implements ARMB4ViewManagerInterface{
 		$css_files_on_js_folder = $this->findAssets( $this->_config->getAssetsFolder() . "/" . $this->_config->js_folder_name,  $this->_config->css_file_extension , $arrayPathFolder ) ;
 		$css_files = array_merge( $css_files , $css_files_on_js_folder ) ;
 
-		ARMDebug::ifPrint($css_files , "b4view" ) ;
+		ARMDebug::ifPrint($css_files , "b4view" );
 
 		$b4ViewHtml = NULL ;
 

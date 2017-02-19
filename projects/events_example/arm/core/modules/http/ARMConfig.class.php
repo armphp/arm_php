@@ -222,35 +222,36 @@ class ARMConfig implements ARMModuleInterface {
 		}
 		
 		$this->configVO = ARMDataHandler::objectMerge(  $configResult , $def) ; 
-		
-		
-		if( ! $this->configVO->folder_request_controler ){
-			ARMDebug::error( $configError."folder_request_controler  can't be NULL" );
+		//if redirect mode, this thinks no mathers
+		if(!$this->configVO->redirect_to) {
+
+			if (!$this->configVO->folder_request_controller) {
+				ARMDebug::error($configError . "folder_request_controller  can't be NULL");
+			}
+
+			if (!$this->configVO->folder_modules_config) {
+				ARMDebug::error($configError . "folder_modules_config  can't be NULL");
+			}
+			if (!$this->configVO->app_url) {
+				ARMDebug::error($configError . "app_url  can't be NULL");
+			} else if (!$this->configVO->root_url) {
+				//não foi setado root path, poe um valor baseado na app_url
+				$this->configVO->root_url = $this->configVO->app_url;
+			}
+
+			$this->configVO->root_url = preg_replace("/(https?:\/\/)/", "", $this->configVO->root_url);
+			$this->configVO->app_url = preg_replace("/(https?:\/\/)/", "", $this->configVO->app_url);
+
+			if (!$this->configVO->class_path_list) {
+				ARMDebug::error($configError . "class_path_list  can't be NULL");
+			} elseif (count($this->configVO->class_path_list) < 1) {
+				ARMDebug::error($configError . "class_path_list  must have more itens");
+			} else {
+				$this->configVO->class_path_list[] = $this->configVO->folder_request_controller;
+
+			}
+
 		}
-		
-		if( !$this->configVO->folder_modules_config ){
-			ARMDebug::error( $configError."folder_modules_config  can't be NULL" );
-		}
-		if( ! $this->configVO->app_url ){
-			ARMDebug::error( $configError."app_url  can't be NULL" );
-		} else if( ! $this->configVO->root_url ){
-			//não foi setado root path, poe um valor baseado na app_url
-			$this->configVO->root_url = $this->configVO->app_url ;
-		}
-		
-		$this->configVO->root_url 		= preg_replace("/(https?:\/\/)/", "", $this->configVO->root_url );
-		$this->configVO->app_url 	= preg_replace("/(https?:\/\/)/", "", $this->configVO->app_url );
-		
-		if( ! $this->configVO->class_path_list ){
-			ARMDebug::error( $configError."class_path_list  can't be NULL" );
-		} elseif ( count($this->configVO->class_path_list) < 1){
-			ARMDebug::error( $configError."class_path_list  must have more itens" );
-		} else {
-			$this->configVO->class_path_list[] = $this->configVO->folder_request_controler ;
-			
-		}
-		
-		
 		
 		
 		if( $this->configVO->dev )
@@ -306,7 +307,7 @@ class ARMConfig implements ARMModuleInterface {
 		return $this->configVO->request_access_controll ;
 	}
 	public function getFolderRequestController(){
-		return $this->configVO->folder_request_controler;
+		return $this->configVO->folder_request_controller;
 	}
 	
 

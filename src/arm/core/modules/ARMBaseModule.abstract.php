@@ -93,7 +93,10 @@ abstract class ARMBaseModuleAbstract extends ARMBaseSingletonAbstract implements
 	
 	
 	public static function getInstanceByPath( $pathToFindConfig  ) {
-
+		
+// 		ARMDebug::print_r($pathToFindConfig );
+// 		die;
+		
 		$realClass = get_called_class() ;
 		$class_name 	= $realClass::getConfigFolderName()  ;
 		$alias 			= is_array( $pathToFindConfig ) ? implode("/", $pathToFindConfig )  : $pathToFindConfig  ;

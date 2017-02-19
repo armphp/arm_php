@@ -1952,11 +1952,11 @@ class PHPMailer {
   /**
    * Adds an embedded attachment.  This can include images, sounds, and
    * just about any other document.  Make sure to set the $type to an
-   * images type.  For JPEG images use "images/jpeg" and for GIF images
-   * use "images/gif".
+   * image type.  For JPEG images use "image/jpeg" and for GIF images
+   * use "image/gif".
    * @param string $path Path to the attachment.
    * @param string $cid Content ID of the attachment.  Use this to identify
-   *        the Id for accessing the images in an HTML form.
+   *        the Id for accessing the image in an HTML form.
    * @param string $name Overrides the attachment name.
    * @param string $encoding File encoding (see $Encoding).
    * @param string $type File extension (MIME) type.
@@ -2244,7 +2244,7 @@ class PHPMailer {
   }
 
   /**
-   * Gets the MIME type of the embedded or inline images
+   * Gets the MIME type of the embedded or inline image
    * @param string File extension
    * @access public
    * @return string MIME type of ext
@@ -2309,14 +2309,14 @@ class PHPMailer {
       'ra'    =>  'audio/x-realaudio',
       'rv'    =>  'video/vnd.rn-realvideo',
       'wav'   =>  'audio/x-wav',
-      'bmp'   =>  'images/bmp',
-      'gif'   =>  'images/gif',
-      'jpeg'  =>  'images/jpeg',
-      'jpg'   =>  'images/jpeg',
-      'jpe'   =>  'images/jpeg',
-      'png'   =>  'images/png',
-      'tiff'  =>  'images/tiff',
-      'tif'   =>  'images/tiff',
+      'bmp'   =>  'image/bmp',
+      'gif'   =>  'image/gif',
+      'jpeg'  =>  'image/jpeg',
+      'jpg'   =>  'image/jpeg',
+      'jpe'   =>  'image/jpeg',
+      'png'   =>  'image/png',
+      'tiff'  =>  'image/tiff',
+      'tif'   =>  'image/tiff',
       'css'   =>  'text/css',
       'html'  =>  'text/html',
       'htm'   =>  'text/html',

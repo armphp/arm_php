@@ -47,10 +47,7 @@ class ARMModuleJsonConfigLoader implements ARMConfigResolverInterface {
 			$data = file_get_contents( $configFile ) ;
 			$dataObject = json_decode( $data ) ;
 			if( is_null($dataObject) ){
-				ARMDebug::error( "JSON sintax ERROR on file :: " .  $configFile ) ;
-				ARMDebug::li( "File content: " );
-				ARMDebug::print_r( $data );
-		
+				throw new ErrorException( "JSON sintax ERROR on file :: " .  $configFile ) ;
 				die ;
 			}
 			return $dataObject ;

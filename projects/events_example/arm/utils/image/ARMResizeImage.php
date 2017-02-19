@@ -6,7 +6,7 @@
 #  Author:    Rajani .B
 #  Version:     1.0
 #  Date:      07-July-2010
-#  Purpose:   Resizes and saves images
+#  Purpose:   Resizes and saves image
 #  Requires : Requires PHP5, GD library.
 #  Usage Example:
 #                     include("classes/resize_class.php");
@@ -21,7 +21,7 @@
  * Upgrade class
  * User: Renato Miawaki - reytuty@gmail.com
  * Date: 01/12/15
- * @version
+ * @version 1.2
  */
 
 class ARMResizeImage {
@@ -164,7 +164,7 @@ class ARMResizeImage {
 		if($debugando){
 			echo ARMDebug::li(" depois resizeImage  optimal: $optimalWidth, $optimalHeight, new : $newWidth, $newHeight, $option , this->width: $this->width, this->height : $this->height");
 		}
-		// *** Resample - create images canvas of x, y size
+		// *** Resample - create image canvas of x, y size
 		$this->imageResized = imagecreatetruecolor($optimalWidth, $optimalHeight);
 		if($this->extension_file == "png") imagealphablending($this->imageResized, false);
 
@@ -278,25 +278,57 @@ class ARMResizeImage {
 		{
 			case '.jpg':
 			case '.jpeg':
-				header("Content-type: images/jpeg");
+				header("Content-type: image/jpeg");
 				imagejpeg( $this->imageResized );
 				break;
 			case '.gif':
-				header("Content-type: images/gif");
+				header("Content-type: image/gif");
 				imagegif( $this->imageResized );
 				break;
 			case '.png':
-				header("Content-type: images/png");
+				header("Content-type: image/png");
 				imagepng( $this->imageResized );
 				break;
 			case '.bmp':
-				header("Content-type: images/vnd.wap.wbmp");
+				header("Content-type: image/vnd.wap.wbmp");
 				imagewbmp( $this->imageResized );
 			default:
 				return ;
 				break;
 		}
 		imagedestroy( $this->imageResized ) ;
+	}
+
+	/**
+	 * Exibe a imagem de tamanho original
+	 */
+	public function showOriginal(){
+		$extension = $this->imageType;
+		//echo ARMDebug::li($extension);
+		//$extension = ARMDataHandler::returnExtensionOfFile($file);
+		switch($extension)
+		{
+			case '.jpg':
+			case '.jpeg':
+				header("Content-type: image/jpeg");
+				imagejpeg( $this->image );
+				break;
+			case '.gif':
+				header("Content-type: image/gif");
+				imagegif( $this->image );
+				break;
+			case '.png':
+				header("Content-type: image/png");
+				imagepng( $this->image );
+				break;
+			case '.bmp':
+				header("Content-type: image/vnd.wap.wbmp");
+				imagewbmp( $this->image );
+			default:
+				return ;
+				break;
+		}
+		imagedestroy( $this->image ) ;
 	}
 
 	## --------------------------------------------------------
@@ -307,7 +339,7 @@ class ARMResizeImage {
 		$cropStartX = (($startX) ? ($startX) : ( ( $optimalWidth / 2) - ( $newWidth /2 ) ));
 		$cropStartY = (($startY) ? ($startY) : ( ( $optimalHeight/ 2) - ( $newHeight/2 ) ));
 
-		// *** Resample - create images canvas of x, y size
+		// *** Resample - create image canvas of x, y size
 		$crop = imagecreatetruecolor($newWidth , $newHeight);
 		if($this->extension_file == "png") imagealphablending($crop, false);
 

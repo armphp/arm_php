@@ -13,12 +13,13 @@ class ARMMysqliConfigVO extends ARMAutoParseAbstract implements ARMDbConfigInter
 	public  $user ;
 	public  $password ;
 	public  $database ;
+    public  $encode;
 	
 	public  $name ;
 	public  $alias ;
 	public  $driver = ARMDBManager::DRIVER_MYSQLI ;
 	/**
-	 * (non-PHPdoc)
+	 *
 	 * @see ARMDbConfigInterface::getAlias()
 	 */
 	function getAlias(){
@@ -70,7 +71,10 @@ class ARMMysqliConfigVO extends ARMAutoParseAbstract implements ARMDbConfigInter
 	function getPassword(){
 		return $this->password;
 	}
-	
+
+	function getEncode(){
+	    return $this->encode;
+    }
 	/**
 	 * (non-PHPdoc)
 	 * @see ARMDbConfigInterface::getDBName()

@@ -2,9 +2,10 @@
 
 /**
  * 
- * VO de configuração ximples para
+ * VO de configuração simples para
  * 
  * @author renato miawaki
+ * @version 1.1
  *
  */
 class ARMSimplePHPResultConfigVO extends ARMAutoParseAbstract {

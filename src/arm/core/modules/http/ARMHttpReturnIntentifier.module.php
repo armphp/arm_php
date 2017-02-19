@@ -27,6 +27,7 @@ class ARMHttpReturnIntentifierModule extends ARMBaseModuleAbstract implements AR
 		$type = ARMConfig::getDefaultInstance()->getDefaultRequestResultType() ;
 		
 		$settedType = ARMNavigation::getVar( $this->_config->default_variable_name ) ;
+
 		if( $settedType ){
 			$type = $settedType ;
 		}

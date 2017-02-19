@@ -8,6 +8,7 @@
 
 class ARMLogInfoVO extends ARMAutoParseAbstract{
 
+
 	/**
 	 * @type : int(10) unsigned
 	 */

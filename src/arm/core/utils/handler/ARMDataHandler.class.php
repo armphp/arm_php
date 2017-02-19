@@ -1,40 +1,44 @@
 <?php
- /*
+/*
  * @autor		: Renato Miawaki - reytuty@gmail.com
  * @data		: 15/12/2009
  * @versao		: 1.0
  * @comentario	: listaDiretorio($urlDoDiretorio) - metodo adicional para listar arquivos de um diretï¿½rio
  */
- /*
+/*
  * @autor		: Renato Miawaki | Mauricio Amorim | Alan Lucian
  * @data		: 07/07/2010
  * @versao		: 1.1 (inglï¿½s)
  * @comentario	: listDirectory($urlOfDirectory) - metodo adicional para listar arquivos de um diretï¿½rio
  * @description	: 	Classe para auxilio na manipulaï¿½ï¿½o de dados.
- *
- *
+ */
+/*
  * @autor		: Leandro Leal
  * @data		: 22/04/2014
  * @versao		: 1.2
  * @comentario	: Nova função  clearFolder para limpar os arquivos temporários da pasta temp e afins.
  *
+ *
+ */
+/*
  * @autor		: Renato Miawaki
  * @data		: 01/12/2015
  * @versao		: 1.3
  * @comentario	: novos metodos de tratamento de pastas
  *
  *
- *
+ */
+/*
  * @autor		: Renato Miawaki
- * @data		: 22/8/2016
+ * @data		: 08/10/2016
  * @versao		: 1.4
- * @comentario	: FIX bug createFolderIfNotExists
+ * @comentario	: novos metodos de tratamento de pastas
+ *
  *
  */
-
 class ARMDataHandler extends ARMDataStringHandler {
 
-	
+
 	/**
 	 * Pega uma array de objetos instanciados e o nome de uma de suas propriedades e converte numa array só com os valores desse campo
 	 * @param array $array_of_objects
@@ -86,51 +90,8 @@ class ARMDataHandler extends ARMDataStringHandler {
 		}
 		return $date;
 	}
-	
-	
-	public static function DOMNodeListToArray( DOMNodeList $DOMNodeList ){
-		$list = array();
-		for( $i = 0 ; $i < $DOMNodeList->length ; $i++ ){
-			$list[] =  self::DOMElementToObject( $DOMNodeList->item( $i ) ) ;
-		}
-		return $list ;
-	}
 
-	/**
-	 *
-	 * @param $DOMElement
-	 * @return stdClass
-	 */
-	public static function DOMElementToObject(  $DOMElement ){
-		
-// 		var_dump( $DOMElement );
-		
-// 		if(   )
-	 	
-		$element = new stdClass();
-		
-		if( $DOMElement->hasAttributes() ){
-			$attr = new stdClass();
-			for ($i = 0; $i < $DOMElement->attributes->length; $i++) {
-// 				echo "@". $DOMElement->attributes->item($i)->name . " -> " . $DOMElement->attributes->item($i)->value ;
-				$attr_name = $DOMElement->attributes->item($i)->name;
-				$attr_value = $DOMElement->attributes->item($i)->value;
-				$attr->$attr_name =  $attr_value ;
-				
-			}
-			$element->attributes = $attr ;
-		}
-		if( $DOMElement->hasChildNodes() ){
-			$childs = self::DOMNodeListToArray( $DOMElement->childNodes );
-			$element->childs		= $childs ;
-		}
-		
-		$element->name 			= $DOMElement->nodeName ;
-		$element->value			= $DOMElement->nodeValue ;
-		
-		return $element ;
-		
-	}
+
 
 
 	/**
@@ -147,9 +108,9 @@ class ARMDataHandler extends ARMDataStringHandler {
 
 
 	/**
-	 * 
+	 *
 	 * Adiciona as propriedades do segundo objeto no primeiro, mantendo as do primeiro caso haja duplicidade
-	 * 
+	 *
 	 * @param object $main_object
 	 * @param object $object_to_add
 	 * @param object $override_null
@@ -161,7 +122,7 @@ class ARMDataHandler extends ARMDataStringHandler {
 		}
 		foreach( $object_to_add as $key => $value){
 			$add = FALSE ;
-			
+
 			if( !property_exists( $main_object, $key ) )
 				$add = TRUE ;
 
@@ -169,22 +130,22 @@ class ARMDataHandler extends ARMDataStringHandler {
 			if( $override_null && ARMClassHandler::hasPublicAttrribute($main_object,$key) && is_null( $main_object->$key ) ){
 
 				$add = TRUE ;
-            }
-			
+			}
+
 			if( $override_all )
 				$add = TRUE ;
-			
+
 			if( $add )
 				$main_object->$key = $value ;
-				
+
 		}
-		
+
 		return $main_object ;
 	}
-	
-	
-	
-	
+
+
+
+
 	static function convertDbDateToLocale($locale = "pt-br", $date_time, $noTime = FALSE){
 		switch($locale){
 			case "en":
@@ -196,9 +157,67 @@ class ARMDataHandler extends ARMDataStringHandler {
 				break;
 		}
 	}
-	
-	
-	/** 
+
+	/**
+	 * Filtra a array por um campo específico
+	 * Varre a array procurando pelo valor de um campo do objeto para ver se é igual ao field_value enviado
+	 *
+	 * @param $array_object
+	 * @param $field
+	 * @param $field_value
+	 * @return array
+	 */
+	public static function filterArrayObjectByFieldValue( $array_object, $field, $field_value ){
+		if(! is_array( $array_object ) ){
+			return [];
+		}
+		if( ! count($array_object) > 0 ){
+			return [];
+		}
+		$result = [] ;
+		foreach( $array_object as $item ){
+			if( is_object( $item ) ){
+				//verificando se tem id do pai, pois o primeiro nível da array é apenas de dad_id = $root_id
+				$value = self::getValueByStdObjectIndex( $item, $field ) ;
+				if( $value == $field_value ){
+					$result[] = $item ;
+				}
+			}
+		}
+		return $result ;
+	}
+	/**
+	 * Retorna um array organizado em arvore colocando uma nova propriedade dentro do próprio objeto com a array de filhos
+	 *
+	 * @param $array_object array de objeto
+	 * @param $node_dad_id o nome do atributo que define o id pai desse objeto
+	 * @param string $node_id o nome do atributo que define o id desse objeto
+	 * @param string $childField o nome do atributo a ser criado para conter a array de filhos
+	 * @param null $root_id quao é o id root a ser considerado como inicial
+	 * @return array
+	 */
+	public static function organizeArrayObjectToTree( $array_object, $node_dad_id, $node_id = "id", $childField = "_childs", $root_id = NULL ){
+		if(! is_array( $array_object ) ){
+			return [];
+		}
+		if( ! count($array_object) > 0 ){
+			return [];
+		}
+		$result = [] ;
+		foreach( $array_object as $item ){
+			if( is_object( $item ) ){
+				//verificando se tem id do pai, pois o primeiro nível da array é apenas de dad_id = $root_id
+				$dad_id = self::getValueByStdObjectIndex( $item, $node_dad_id ) ;
+				if($root_id == $dad_id){
+					$item->$childField = self::organizeArrayObjectToTree($array_object, $node_dad_id, $node_id, $childField, $item->$node_id );
+					$result[] = $item ;
+				}
+			}
+		}
+		return $result ;
+	}
+
+	/**
 	 * atenÃ§Ã£o sÃ³ converte data vindo com formato do banco
 	 * @param $date_time
 	 * @param $noTime
@@ -240,7 +259,7 @@ class ARMDataHandler extends ARMDataStringHandler {
 		}
 		return NULL;
 	}
-	
+
 	/**
 	 * @param $date_time
 	 * @param $noTime
@@ -285,7 +304,7 @@ class ARMDataHandler extends ARMDataStringHandler {
 		}else{
 			return  $valor['d']."/".$valor['m']."/".$valor['Y']." ".$valor['H'].":".$valor['i'].":".$valor['s'];
 		}
-		
+
 	}
 
 	/**
@@ -331,14 +350,6 @@ class ARMDataHandler extends ARMDataStringHandler {
 			self::createFolderIfNotExist($url);
 		}
 	}
-
-	/**
-	 * Cria uma pasta caso ela não exista com permissão enviada em parametro
-	 *
-	 * @param $url
-	 * @param int $mode
-	 * @throws ErrorException
-	 */
 	static function createFolderIfNotExist($url , $mode = 0775){
 		//fazer o upgrade para ser recursivo
 		if(!file_exists($url)){
@@ -346,23 +357,24 @@ class ARMDataHandler extends ARMDataStringHandler {
 			if( !$mkdir_success){
 				throw new ErrorException( "ARMDataHandler::createFolderIfNotExist - mkdir - permission denied- ". getcwd() . DIRECTORY_SEPARATOR . $url ) ;
 			}
-			if( !is_writable( $url ) ){
-				$chmod_success = @chmod($url, $mode);
-				if( !$chmod_success){
-					throw new ErrorException( "ARMDataHandler::createFolderIfNotExist - chmod - permission denied- ". getcwd() . DIRECTORY_SEPARATOR . $url ) ;
-				}
+		}
+		if( !is_writable( $url ) ){
+			$chmod_success = @chmod($url, $mode);
+			if( !$chmod_success){
+				throw new ErrorException( "ARMDataHandler::createFolderIfNotExist - chmod - permission denied- ". getcwd() . DIRECTORY_SEPARATOR . $url ) ;
 			}
 		}
+
 	}
-	
-	
+
+
 	//@TODO: sistema de mascara @
 	static function convertMoneyToDB( $valueString ){
 		//@TODO: Upgrade p/ usar o DataMask  ( esse metodo vai sumir)
 		$valueString = preg_replace( "/^([^0-9._]*)/", "" , $valueString ) ;
-		
+
 		if(strpos($valueString, ',') === FALSE)
-            return (float)$valueString;    
+			return (float)$valueString;
 		$valueString = str_replace(".", "", $valueString);
 		$valueString = str_replace(",", ".", $valueString);
 		return (float)$valueString;
@@ -370,15 +382,15 @@ class ARMDataHandler extends ARMDataStringHandler {
 	static function convertMoneyToBrazil($valueString, $simbol= TRUE){
 		//@TODO: Upgrade p/ usar o DataMask  ( esse metodo vai sumir)
 		$changeNumberF = TRUE;
-	    if(strpos($valueString, ',') !== FALSE)
-            $changeNumberF = FALSE;
-		
+		if(strpos($valueString, ',') !== FALSE)
+			$changeNumberF = FALSE;
+
 		if($changeNumberF){
 			$valueString = number_format((float) $valueString, 2 , ',', '.');
-			
-		}    
+
+		}
 		return  ($simbol && strpos($valueString, 'R$') === FALSE ? 'R$ ' : '') . $valueString ;
-		
+
 		$valueString = str_replace(".", ",", $valueString);
 		if(!preg_match_all("/.*,(.*)?/", $valueString, $arrayValue)){
 			$valueString .= ",00";
@@ -390,13 +402,13 @@ class ARMDataHandler extends ARMDataStringHandler {
 		//print_r($arrayValor[1]);
 		return $valueString;
 	}
-	
-    
-    /**
-     * Remove caracteres especiais ( feito para gerar strings limpas para campos de busca por exemplo )
-     * Tenta manter o máximo que puder de conteúdo, só que sem caracteres especiais e sem acentos latinos 
-     * @param String $string
-     */
+
+
+	/**
+	 * Remove caracteres especiais ( feito para gerar strings limpas para campos de busca por exemplo )
+	 * Tenta manter o máximo que puder de conteúdo, só que sem caracteres especiais e sem acentos latinos
+	 * @param String $string
+	 */
 	static function removeSpecialCharacters($string, $keepWhiteSpace = FALSE){
 		$string = str_replace("/", "", $string);
 		$string = str_replace(".", "", $string);
@@ -407,7 +419,7 @@ class ARMDataHandler extends ARMDataStringHandler {
 		return @preg_replace("/([^a-zA-Z0-9_-])/", "", $string);
 	}
 	static function strToURL($string){
-		
+
 //		echo $string;
 		$string = trim($string);
 		$string = str_replace("  ", " ", $string);
@@ -422,25 +434,25 @@ class ARMDataHandler extends ARMDataStringHandler {
 //		echo "</br>";
 		return $string;
 	}
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	static function addQuotes($string){
 		$string = str_replace("'", "\'", $string);
 		$string = str_replace("\"", "\\\"", $string);
 		return $string;
 	}
-	 
+
 	/**
 	 * retorna string sem tags, html entitys e sem acento
 	 * @param $text (string)
 	 * @return string
-	 * 
+	 *
 	 */
-	
+
 	static function writeFile($place, $name, $content, $fopenParam = "a+"){
 		/*
 		'r'  	 Abre somente para leitura; coloca o ponteiro do arquivo no comeï¿½o do arquivo.
@@ -450,7 +462,7 @@ class ARMDataHandler extends ARMDataStringHandler {
 		'a' 	Abre somente para escrita; coloca o ponteiro do arquivo no final do arquivo. Se o arquivo nï¿½o existir, tenta criï¿½-lo.
 		'a+' 	Abre para leitura e escrita; coloca o ponteiro do arquivo no final do arquivo. Se o arquivo nï¿½o existir, tenta criï¿½-lo.
 		'x' 	Cria e abre o arquivo somente para escrita; coloca o ponteiro no comeï¿½o do arquivo. Se o arquivo jï¿½ existir, a chamada a fopen() falharï¿½, retornando FALSE e gerando um erro de nï¿½vel E_WARNING. Se o arquivo nï¿½o existir, tenta criï¿½-lo. Isto ï¿½ equivalente a especificar as flags O_EXCL|O_CREAT para a chamada de sistema open(2).
-		'x+' 	Cria e abre o arquivo para leitura e escrita; coloca o ponteiro no comeï¿½o do arquivo. Se o arquivo jï¿½ existir, a chamada a fopen() falharï¿½, retornando FALSE e gerando um erro de nï¿½vel E_WARNING. Se o arquivo nï¿½o existir, tenta criï¿½-lo. Isto ï¿½ equivalente a especificar as flags O_EXCL|O_CREAT para a chamada de sistema open(2). 
+		'x+' 	Cria e abre o arquivo para leitura e escrita; coloca o ponteiro no comeï¿½o do arquivo. Se o arquivo jï¿½ existir, a chamada a fopen() falharï¿½, retornando FALSE e gerando um erro de nï¿½vel E_WARNING. Se o arquivo nï¿½o existir, tenta criï¿½-lo. Isto ï¿½ equivalente a especificar as flags O_EXCL|O_CREAT para a chamada de sistema open(2).
 		*/
 		if(!file_exists($place)){
 			//ARMDebug::li("pasta nao existe $place ", false, true);
@@ -458,11 +470,11 @@ class ARMDataHandler extends ARMDataStringHandler {
 		if (!$handle = fopen($place.$name, $fopenParam)) {
 			return FALSE;
 		}
-	   if (!fwrite($handle, $content)) {
+		if (!fwrite($handle, $content)) {
 			return FALSE;
-	   }
-	   fclose($handle);
-	   return TRUE;
+		}
+		fclose($handle);
+		return TRUE;
 	}
 	public static function deleteDirectory($urlOfDirectory){
 		$arrayExeptionFiles = array(".", "..");
@@ -477,20 +489,20 @@ class ARMDataHandler extends ARMDataStringHandler {
 					}
 					$fileUrl = ARMDataHandler::removeDoubleBars($urlOfDirectory."/".$item);
 					if($extencion == ""){
-							if(in_array($item, $arrayExeptionFiles)){
-								//não fazer nada com esse
-							} else {
-								$newfolder = ARMDataHandler::removeDoubleBars($urlOfDirectory."/".$item);
-								if(file_exists($newfolder)){
-									//é um folder, vai varrer dentro do folder tb - recursivo
-									if(is_dir($newfolder)){
-										//echo ARMDebug::li("a pasta será varrida:".$newfolder);
-										self::deleteDirectory($newfolder);
-									} else {
-										unlink($newfolder);
-									}
+						if(in_array($item, $arrayExeptionFiles)){
+							//não fazer nada com esse
+						} else {
+							$newfolder = ARMDataHandler::removeDoubleBars($urlOfDirectory."/".$item);
+							if(file_exists($newfolder)){
+								//é um folder, vai varrer dentro do folder tb - recursivo
+								if(is_dir($newfolder)){
+									//echo ARMDebug::li("a pasta será varrida:".$newfolder);
+									self::deleteDirectory($newfolder);
+								} else {
+									unlink($newfolder);
 								}
 							}
+						}
 					} else {
 						//ve se é um arquivo a se deletar
 						unlink($fileUrl);
@@ -500,13 +512,13 @@ class ARMDataHandler extends ARMDataStringHandler {
 				rmdir($urlOfDirectory);
 			}
 		} catch(Exception $e){
-			$returnResultVO = new ARMReturnResultVO(); 
+			$returnResultVO = new ARMReturnResultVO();
 			//mudinho
 			$returnResultVO->success = FALSE;
 			$returnResultVO->addMessage( $e );
 			return $returnResultVO;
 		}
-		
+
 	}
 	static function listDirectory($urlOfDirectory, $extention = "*"){
 		//$extencao : envie "jpg" caso queira sï¿½ os arquivos .jpg
@@ -549,10 +561,10 @@ class ARMDataHandler extends ARMDataStringHandler {
 				break;
 		}
 	}
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * @param unknown $value
 	 * @return boolean
 	 */
@@ -563,7 +575,7 @@ class ARMDataHandler extends ARMDataStringHandler {
 		if(!is_array($array)){
 			return "";
 		}
-		
+
 	}
 	/**
 	 * @param object $obj
@@ -590,12 +602,12 @@ class ARMDataHandler extends ARMDataStringHandler {
 		}
 		return $str_xml;
 	}
-	
-	
+
+
 	static function addSimpleFlash($largura, $altura, $nomeSwf, $arrayParametros=array(), $transparent=FALSE, $cor="#000000", $idFlash = NULL){
 
 		//$urlTemplate = "classes/utils/templates/flash/object.html";
-		
+
 		if($idFlash == NULL || $idFlash == ""){
 			$rand1 = rand(1, 3255);
 			$rand2 = rand(1, 3255);
@@ -603,9 +615,9 @@ class ARMDataHandler extends ARMDataStringHandler {
 			$idFlash = "flash_".$rand1."_".$rand2."_".$rand3;
 		}
 		###id_div_flash###
-		
+
 		global $URL;
-		
+
 		$flashConteudoSujo = "<div id=\"$idFlash\"></div><script>
 var so = new SWFObject('".$URL.$nomeSwf."', '".$nomeSwf."', '".$largura."', '".$altura."', '9', '".$cor."');
     ###config###
@@ -653,16 +665,16 @@ var so = new SWFObject('".$URL.$nomeSwf."', '".$nomeSwf."', '".$largura."', '".$
 	 * @return mixed
 	 */
 	static function addFlashSendImage(
-			$urlToSend, 
-			$titulo = "fotos",
-			$rotulo = "escolher arquivo", 
-			$descriptionFile  = "Todos os Arquivos", 
-			$extencoesValidas = "*.jpg; *.jpeg", 
-			$urlToGet = NULL,
-			$urlToDelete = NULL,
-			$urlToCapa = NULL,
-			$urlToGetThumb = "", 
-			$funcaoNoTermino = "alert", $jsID = "envioFoto", $limiteDeFotos = NULL){
+		$urlToSend,
+		$titulo = "fotos",
+		$rotulo = "escolher arquivo",
+		$descriptionFile  = "Todos os Arquivos",
+		$extencoesValidas = "*.jpg; *.jpeg",
+		$urlToGet = NULL,
+		$urlToDelete = NULL,
+		$urlToCapa = NULL,
+		$urlToGetThumb = "",
+		$funcaoNoTermino = "alert", $jsID = "envioFoto", $limiteDeFotos = NULL){
 		/*
 		rotulo
 		urlToSend
@@ -683,7 +695,7 @@ var so = new SWFObject('".$URL.$nomeSwf."', '".$nomeSwf."', '".$largura."', '".$
 		global $URL;
 		$arrayParametros[] = array("urlProjeto", 		$URL);
 		$arrayParametros[] = array("temCapa", 			"1");
-		
+
 		if($urlToCapa !== NULL){
 			$arrayParametros[] = array("urlToCapa", str_replace(array("&", "="), array("[@]", "[.]"), ($urlToCapa)));
 		}
@@ -696,7 +708,7 @@ var so = new SWFObject('".$URL.$nomeSwf."', '".$nomeSwf."', '".$largura."', '".$
 		if($funcaoNoTermino !== NULL){
 			$arrayParametros[] = array("funcaoNoTermino", 	$funcaoNoTermino);
 		}
-		
+
 		if($limiteDeFotos!== NULL){
 			$arrayParametros[] = array("limiteDeFotos", 	$limiteDeFotos);
 		}
@@ -710,25 +722,50 @@ var so = new SWFObject('".$URL.$nomeSwf."', '".$nomeSwf."', '".$largura."', '".$
 	 * @return value or NULL
 	 */
 	public static function getValueByArrayIndex($p_array, $node_name, $default_value = NULL){
+		if(is_array($node_name)){
+			$currentObj = $p_array ;
+			foreach($node_name as $node){
+				if( ! $currentObj = self::getValueByArrayIndex( $currentObj, $node ) ){
+					return $default_value ;
+				}
+			}
+			return $currentObj ;
+		}
 		return (isset($p_array[$node_name]))?$p_array[$node_name]:$default_value;
 	}
+
+	/**
+	 * @param $p_obj
+	 * @param $node_name string|string[]
+	 * @param null $default_value
+	 * @return null
+	 */
 	public static function getValueByStdObjectIndex($p_obj, $node_name, $default_value = NULL){
+		if( is_array( $node_name ) ){
+			$currentObj = $p_obj ;
+			foreach($node_name as $node){
+				if( ! $currentObj = self::getValueByStdObjectIndex( $currentObj, $node ) ){
+					return $default_value ;
+				}
+			}
+			return $currentObj ;
+		}
 		if( ! $p_obj || ! is_object( $p_obj ) ){
 			return $default_value ;
 		}
 		return (isset($p_obj->$node_name))?$p_obj->$node_name:$default_value;
 	}
 	public static function cleanArrayEmpyIndex($array){
-        $rt = array();
-        for ($i = 0; $i<sizeof($array) ; $i++ )
-            if(!empty($array[$i]))
-                $rt[] = $array[$i];
-                
-        return $rt;
-    }
-	
-	
-	
+		$rt = array();
+		for ($i = 0; $i<sizeof($array) ; $i++ )
+			if(!empty($array[$i]))
+				$rt[] = $array[$i];
+
+		return $rt;
+	}
+
+
+
 	/**
 	 * @param $array array original
 	 * @param $item_or_array que deve ser adicionado ao fim
@@ -746,7 +783,7 @@ var so = new SWFObject('".$URL.$nomeSwf."', '".$nomeSwf."', '".$largura."', '".$
 		}
 		return $array;
 	}
-	
+
 	//@TODO: 5 application stuff remove from HERE
 	public static function stateToUF( $state ) {
 		if( strlen( $state) == 2){
@@ -754,101 +791,101 @@ var so = new SWFObject('".$URL.$nomeSwf."', '".$nomeSwf."', '".$largura."', '".$
 		}
 		$state = ARMDataHandler::strToURL($state);
 		$arrData = array(
-				'AM' => 'Amazonas',
-				'AC' => 'Acre',
-				'AL' => 'Alagoas',
-				'AP' => 'Amapá',
-				'CE' => 'Ceará',
-				'DF' => 'Distrito federal',
-				'ES' => 'Espirito santo',
-				'MA' => 'Maranhão',
-				'PR' => 'Paraná',
-				'PE' => 'Pernambuco',
-				'PI' => 'Piauí',
-				'RN' => 'Rio grande do norte',
-				'RS' => 'Rio grande do sul',
-				'RO' => 'Rondônia',
-				'RR' => 'Roraima',
-				'SC' => 'Santa catarina',
-				'SE' => 'Sergipe',
-				'TO' => 'Tocantins',
-				'PA' => 'Pará',
-				'BH' => 'Bahia',
-				'GO' => 'Goiás',
-				'MT' => 'Mato grosso',
-				'MS' => 'Mato grosso do sul',
-				'RJ' => 'Rio de janeiro',
-				'SP' => 'São paulo',
-				'RS' => 'Rio grande do sul',
-				'MG' => 'Minas gerais',
-				'PB' => 'Paraiba',
+			'AM' => 'Amazonas',
+			'AC' => 'Acre',
+			'AL' => 'Alagoas',
+			'AP' => 'Amapá',
+			'CE' => 'Ceará',
+			'DF' => 'Distrito federal',
+			'ES' => 'Espirito santo',
+			'MA' => 'Maranhão',
+			'PR' => 'Paraná',
+			'PE' => 'Pernambuco',
+			'PI' => 'Piauí',
+			'RN' => 'Rio grande do norte',
+			'RS' => 'Rio grande do sul',
+			'RO' => 'Rondônia',
+			'RR' => 'Roraima',
+			'SC' => 'Santa catarina',
+			'SE' => 'Sergipe',
+			'TO' => 'Tocantins',
+			'PA' => 'Pará',
+			'BH' => 'Bahia',
+			'GO' => 'Goiás',
+			'MT' => 'Mato grosso',
+			'MS' => 'Mato grosso do sul',
+			'RJ' => 'Rio de janeiro',
+			'SP' => 'São paulo',
+			'RS' => 'Rio grande do sul',
+			'MG' => 'Minas gerais',
+			'PB' => 'Paraiba',
 		);
-	
+
 		foreach(  $arrData as $uf=>$name ){
 			$name = ARMDataHandler::strToURL( $name );
 			if( $name == $state )
 				return $uf;
-				
+
 		}
-	
+
 		return $uf;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @see ARMDataHandler::cleanBrazilianWordsToSearch
-	 * 
+	 *
 	 */
 	public static function getBrazilianArticles(){
 		//@TODO: 5 application stuff remove from HERE
-		
+
 		return $articles  = array('e',
-				'os','um',
-				'uns','a',
-				'as','uma',
-				'umas','o',
-				'a','os',
-				'as','um',
-				'uma','uns',
-				'umas','a',
-				'ao','à',
-				'aos','às',
-				'em','num',
-				'numa','nuns',
-				'numas','de',
-				'do','da',
-				'dos','das',
-				'em','no',
-				'na','nos',
-				'nas','de',
-				'dum','duma',
-				'duns','dumas',
-				'por','per',
-				'pelo','pela',
-				'pelos','pelas',
+			'os','um',
+			'uns','a',
+			'as','uma',
+			'umas','o',
+			'a','os',
+			'as','um',
+			'uma','uns',
+			'umas','a',
+			'ao','à',
+			'aos','às',
+			'em','num',
+			'numa','nuns',
+			'numas','de',
+			'do','da',
+			'dos','das',
+			'em','no',
+			'na','nos',
+			'nas','de',
+			'dum','duma',
+			'duns','dumas',
+			'por','per',
+			'pelo','pela',
+			'pelos','pelas',
 		);
 	}
-	
+
 	/**
 	 * @see ARMDataHandler::cleanBrazilianWordsToSearch
 	 *
 	 */
 	public static function getOtherBrazilianWordsToRemove(){
 		//@TODO: 5 application stuff remove from HERE
-		
+
 		return  $words  = array('a',
-					'ante','após',
-					'até','com',
-					'de','desde',
-					'em','entre',
-					'para','por',
-					'sem','sob',
-					'sobre','trás',
-					'como','que',
-					'ou' );
+			'ante','após',
+			'até','com',
+			'de','desde',
+			'em','entre',
+			'para','por',
+			'sem','sob',
+			'sobre','trás',
+			'como','que',
+			'ou' );
 	}
-	
+
 	/**
 	 * Remove all irelevants words to do a text search on PT-BR language
 	 * @param multitype:array |string $words
@@ -857,53 +894,83 @@ var so = new SWFObject('".$URL.$nomeSwf."', '".$nomeSwf."', '".$largura."', '".$
 	 */
 	public static function cleanBrazilianWordsToSearch( $words , $separator = " "){
 		//@TODO: 5 application stuff remove from HERE
-		
+
 		$is_array = is_array( $words ) ;
-		
+
 		$articles  = array_merge(self::getBrazilianArticles()  ,  self::getOtherBrazilianWordsToRemove() ) ;
-		
+
 		if( ! $is_array )
 			$words = explode( $separator, $words );
-		
+
 		$final_words = array();
 		foreach( $words as $word ){
 			if( !in_array( $word, $articles) && strlen( $word) > 0 ){
 				$final_words[] = $word ;
 			}
 		}
-		
+
 		if( $is_array )
 			return $final_words ;
-			
+
 		return implode( $separator , $final_words );
 	}
-	
-	
+
+
+	/**
+	 *
+	 * Retorna a mesma string substituindo o que está na string dentro de {} da key de uma array ou obj
+	 *
+	 * @param $ob array or object
+	 * @param $string
+	 * @return string
+	 */
+	public static function replacePropertiesString( $ob, $string ){
+		if( $ob && ( is_array( $ob ) || is_object( $ob ) ) ){
+			foreach($ob as $key=>$value){
+				if( strpos( $string, "{".$key."}" ) === false ){
+					continue;
+				}
+				$string = str_replace( "{".$key."}", $value, $string ) ;
+			}
+		}
+		return $string ;
+	}
+
+
 	public static function toCurrency( ARMDataMaskInterface $DataMask , $value , $useSymbol = FALSE ){
-		
-		$numberFormat = $DataMask->getCurrencyNumberFormat(); 
-	
+
+		$numberFormat = $DataMask->getCurrencyNumberFormat();
+
 		$value = number_format( $value , $numberFormat->decimals, $numberFormat->dec_point , $numberFormat->thousands_sep) ;
-		
-		if( $useSymbol ) 
+
+		if( $useSymbol )
 			return sprintf(  $DataMask->getCurrencySymbolTemplate() , $value );
-		
+
 		return $value;
 	}
 
 
-    /**
-     * Método utilizado para remover todos os arquivos de um determinado diretório. Não remove sub-folder.
-     * @param $folder
-     * @param string $extesion
-     */
+	/**
+	 * Método utilizado para remover todos os arquivos de um determinado diretório. Não remove sub-folder.
+	 * @param $folder
+	 * @param string $extesion
+	 */
 
-    public static function clearFolder( $folder, $extesion = "*" ){
+	public static function clearFolder( $folder, $extesion = "*" ){
 
-        $folder .= "/";
-        $folder = self::removeDoubleBars( $folder );
-        array_map('unlink', glob( $folder.'*.'.$extesion ));
+		$folder .= "/";
+		$folder = self::removeDoubleBars( $folder );
+		array_map('unlink', glob( $folder.'*.'.$extesion ));
 
-    }
-	
+	}
+
+	public static function jsonDecode($string)
+	{
+		$result = json_decode($string);
+		if (json_last_error() == JSON_ERROR_UTF8) {
+			$result = json_decode(utf8_encode($string));
+		}
+		return $result;
+	}
+
 }

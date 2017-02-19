@@ -79,10 +79,10 @@ class ARMImageWatermark{
 		$main_img_obj_min_y	= floor( ( $main_img_obj_h / 2 ) - ( $watermark_img_obj_h / 2 ) );
 		$main_img_obj_max_y	= ceil( ( $main_img_obj_h / 2 ) + ( $watermark_img_obj_h / 2 ) ); 
 		
-		# create new images to hold merged changes
+		# create new image to hold merged changes
 		$return_img	= imagecreatetruecolor( $main_img_obj_w, $main_img_obj_h );
 	
-		# walk through main images
+		# walk through main image
 		for( $y = 0; $y < $main_img_obj_h; $y++ ) {
 			for( $x = 0; $x < $main_img_obj_w; $x++ ) {
 				$return_color	= NULL;
@@ -95,12 +95,12 @@ class ARMImageWatermark{
 				$main_rgb = imagecolorsforindex( $main_img_obj, imagecolorat( $main_img_obj, $x, $y ) );
 				
 				# if our watermark has a non-transparent value at this pixel intersection
-				# and we're still within the bounds of the watermark images
+				# and we're still within the bounds of the watermark image
 				if (	$watermark_x >= 0 && $watermark_x < $watermark_img_obj_w &&
 							$watermark_y >= 0 && $watermark_y < $watermark_img_obj_h ) {
 					$watermark_rbg = imagecolorsforindex( $watermark_img_obj, imagecolorat( $watermark_img_obj, $watermark_x, $watermark_y ) );
 					
-					# using images alpha, and user specified alpha, calculate average
+					# using image alpha, and user specified alpha, calculate average
 					$watermark_alpha	= round( ( ( 127 - $watermark_rbg['alpha'] ) / 127 ), 2 );
 					$watermark_alpha	= $watermark_alpha * $alpha_level;
 				
@@ -118,15 +118,15 @@ class ARMImageWatermark{
 					
 				} # END if watermark
 		
-				# draw the appropriate color onto the return images
+				# draw the appropriate color onto the return image
 				imagesetpixel( $return_img, $x, $y, $return_color );
 		
 			} # END for each X pixel
 		} # END for each Y pixel
 		
-		# display our watermarked images - first telling the browser that it's a JPEG, 
+		# display our watermarked image - first telling the browser that it's a JPEG, 
 		# and that it should be displayed inline
-//		header( 'Content-Type: images/jpeg' );
+//		header( 'Content-Type: image/jpeg' );
 //		header( 'Content-Disposition: inline; filename=' . $_GET['src'] );
 		//imagejpeg( $return_img, $new_image_path, 100);
 		self::imageX($return_img, $new_image_path, 100);

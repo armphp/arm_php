@@ -2,7 +2,7 @@
 /**
  * @copyright iDress - All rights reserved | Todos os direitos reservados
  * 
- * Class responsable in create and show Thumb Images, using how original images
+ * Class responsable in create and show Thumb Images, using how original image
  * that had been passed by argument in the Constructor method.
  * 
  * Classe responsável em criar e exibir miniatura de imagens, utilizando como imagem original
@@ -66,7 +66,7 @@ class ARMImageHandler {
 	 * @param $new_width
 	 * @param $new_height
 	 * @param $new_image_path
-	 * @param bool $crop force to images croping
+	 * @param bool $crop force to image croping
 	 * @param int $quality 1 > 100
 	 * @return null
 	 */

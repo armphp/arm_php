@@ -129,7 +129,7 @@ class ARMEntityMaker {
 	* @param string \$date
 	*/
 	public function set{$fieldName}(\$date){
-		\$this->getLinkVO();
+		\$this->getVO();
 		\$this->VO->{$field} = ARMDataHandler::convertDateToDB(\$date);
 	}";
 	}
@@ -169,8 +169,8 @@ abstract class ARMBase{$baseClassName}EntityAbstract extends ARMBaseEntityAbstra
 	/**
 	 * @return {$baseClassName}VO
 	 */
-	public function getLinkVO(){
-		return parent::getLinkVO();
+	public function getVO(){
+		return parent::getVO();
 	}
 }
 STRING;

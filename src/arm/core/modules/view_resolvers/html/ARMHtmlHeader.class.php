@@ -69,7 +69,7 @@ class ARMHtmlHeader{
         $head.= '<meta name="description" content="' . $this->description . '" />' . "\n";
 
 //         $head.= '<link rel="icon" type="ima	ge/x-icon" href="'  . Config::getRootUrl("favicon.ico") . '">' . "\n";
-//         $head.= '<link rel="shortcut ico" type="images/x-icon" href="'  . Config::getRootUrl("favicon.ico") . '">' . "\n";
+//         $head.= '<link rel="shortcut ico" type="image/x-icon" href="'  . Config::getRootUrl("favicon.ico") . '">' . "\n";
 
         $head.= '<meta name="keywords" content="' . $this->keywords . '" />' . "\n";
         $head.= '<title>' . $this->title . '</title>' . "\n";
@@ -81,13 +81,13 @@ class ARMHtmlHeader{
 //         	if($this->FacebookHeaderInfoVO->title != "")
 //         		$head.= '<meta property="og:title" content="'.$this->FacebookHeaderInfoVO->title.'" />'. "\n";;
 
-//         	if($this->FacebookHeaderInfoVO->images != "")
-// 	        $head.= '<meta property="og:images" content="'.$this->FacebookHeaderInfoVO->images.'"/>'. "\n";;
+//         	if($this->FacebookHeaderInfoVO->image != "")
+// 	        $head.= '<meta property="og:image" content="'.$this->FacebookHeaderInfoVO->image.'"/>'. "\n";;
 
 //         }
         $head.= '<link rel="apple-touch-icon" href="' . $this->getIpadIcon() . '" />';
 
-        $head.= '<link rel="shortcut icon" type="images/x-icon" href="' . $this->getFavicon() .'" />';
+        $head.= '<link rel="shortcut icon" type="image/x-icon" href="' . $this->getFavicon() .'" />';
 
 
 

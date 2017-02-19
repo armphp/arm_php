@@ -47,7 +47,7 @@ abstract class ARMAutoParseAbstract {
 		if( $string_json == "" ){
 			return ;
 		}		
-		if( ! ARMValidation::isString( $string_json ) ){
+		if( !ARMValidation::isString( $string_json ) ){
 			return ;
 		}
 		$decoded = json_decode( $string_json ) ;

@@ -1,6 +1,6 @@
-<?php 
+<?php
 /**
- * 
+ *
  * @author alanlucian
  *
  */
@@ -8,37 +8,27 @@ class ARMPicasaAPI {
 	public static function init(){
 		//
 	}
-	public static function getPublicAlbumMedia( $publicAlbumURL , $image_size = 1024 ){
-		
-		
-// 		ARMDebug::print_r($publicAlbumURL);
-		
-		//https://plus.google.com/photos/103651147482744881666/albums/5858627894347575585?banner=pwa
-		
-		preg_match_all( "/photos\/([0-9]+)\/albums\/([0-9]+)/" , $publicAlbumURL, $out);
-		
-// 		ARMDebug::print_r( $out );	
-		
-		if( sizeof( $out[1] ) !== 1 )
-			return array();
-		
-		$user_id = $out[1][0];
-		
-		$album_id = $out[2][0];
-		
+
+	/**
+	 * se souber o user id e o album envie
+	 * @param $user_id
+	 * @param $album_id
+	 * @param int $image_size
+	 * @return array
+	 */
+	public static function getPublicAlbumByUserAlbum($user_id, $album_id, $image_size = 1024){
 		$url = "https://picasaweb.google.com/data/feed/api/user/{$user_id}/albumid/{$album_id}/?imgmax={$image_size}";
-		
+
+		//TODO: Refazer a API
+
 // 		ARMDebug::li($url);
-		
+
 		$xml = new XMLReader();
-// 		$xml->setSchema("http://schemas.google.com/photos/exif/2007") ;
 		$xml->open( $url );
-		var_dump( $xml);
- 		var_dump( $xml->expand());
-		
-		
+
+
 		$pictures = array();
-		
+
 		while( $xml->read() &&   $xml->name  !== 'entry' );
 
 		// now that we're at the right depth, hop to the next <product/> until the end of the tree
@@ -47,14 +37,11 @@ class ARMPicasaAPI {
 			// either one should work
 // 			$entry = new XMLReader();
 			//$entry->readOuterXml(  );
-			
+
 			$entry = $xml->expand();
-			 
+
 			$picture = array();
-			
-			
-			
-			
+
 			$items = $entry->getElementsByTagName( "group" ) ;// DOMNodeList
 // 			$pictures[] = ARMDataHandler::DOMNodeListToArray( $items ) ;
 // 			$xml->next('entry');
@@ -65,81 +52,82 @@ class ARMPicasaAPI {
 // 			var_dump( $items, $items->length );
 			for ($i = 0; $i < $items->length; $i++) {
 				$contentDOMNodeList = $items->item( $i )->getElementsByTagName("content")  ;
-				
+
 				$content = array();
 				for( $ii = 0 ; $ii < $contentDOMNodeList->length ; $ii++ ){
 					$DOMElement = $contentDOMNodeList->item( $ii ) ;
 					$content[]  = ARMDataHandler::DOMElementToObject( $DOMElement );;
 				}
-				
+
 				$thumbnailDOMNodeList = $items->item( $i )->getElementsByTagName("thumbnail")  ;
 				$thumbnail = array();
 				for( $ii = 0 ; $ii < $thumbnailDOMNodeList->length ; $ii++ ){
 					$DOMElement = $thumbnailDOMNodeList->item( $ii ) ;
-					
+
 					$thumbnail[]  = ARMDataHandler::DOMElementToObject( $DOMElement );
 				}
-				
+
 				$picture = (object) array( "content"=> $content, "thumbnail"=> $thumbnail );
-				
+
 			}
-			
+
 			$pictures[] = $picture;
-			
+
 			$xml->next('entry');
 		}
 // 		var_dump( $pictures);
 
 		return $pictures;
 	}
-
-	
-	public static function debugDomElement(  $domNode , $indent = "" ){
-		
-		if( FALSE ) $domNode = new DOMNode();
-		
-		echo( $indent . $domNode->nodeName . "\n" );
-		echo( $indent . $domNode->nodeValue . "\n");
-		
-// 		var_dump( $domNode->attributes );
-		if( $domNode->hasAttributes() ){
-			
-			echo( $indent . "@----  " . "\n");
-			
-			$attr = $domNode->attributes ;
-			
-			for ($i = 0; $i < $attr->length; $i++) {
-				
-// 				var_dump( $attr->item($i) );
-// 				self::debugDomNode( $attr->item($i) , $indent."\t");
-				echo( $indent . $attr->item($i)->name . " = " . $attr->item($i)->value . "\n");
-			}
-			echo( $indent . "----@  " . "\n");
-		}
-		
-		if( $domNode->hasChildNodes() ){
-			
-			echo( $indent . "<----  " . "\n");
-			
-			$items = $domNode->childNodes ;
-				
-			for ($i = 0; $i < $items->length; $i++) {
-				self::debugDomElement( $items->item($i) , $indent."\t");
-			}
-			
-			echo( $indent . "---> ". "\n");
-		}
-		
-// 		$items = $entry->childNodes ;
-			
-// 		for ($i = 0; $i < $items->length; $i++) {
-// 			var_dump( $items->item($i)->nodeValue ) ;
-// 		}
-// 		var_dump("===================================");
-		// 			var_dump( $entry, $entry->hasChildNodes(), $entry->childNodes->item(0)->nodeName );
-		
+	/*
+	 <entry>
+		<id>http://picasaweb.google.com/data/entry/api/user/116802681592967253904/albumid/6281653638875239553</id>
+		<published>2016-05-01T07:00:00.000Z</published>
+		<updated>2016-05-06T19:37:22.569Z</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/photos/2007#album'/>
+		<title type='text'>UndoKai - May 1, 2016</title>
+		<summary type='text'>Demonstration kihon, idogeiko and kata</summary>
+		<rights type='text'>public</rights>
+		<link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml'
+			  href='http://picasaweb.google.com/data/feed/api/user/116802681592967253904/albumid/6281653638875239553'/>
+		<link rel='alternate' type='text/html'
+			  href='https://picasaweb.google.com/116802681592967253904/6281653638875239553'/>
+		<link rel='self' type='application/atom+xml'
+			  href='http://picasaweb.google.com/data/entry/api/user/116802681592967253904/albumid/6281653638875239553'/>
+		<author>
+			<name>Wata Watanabe</name>
+			<uri>https://picasaweb.google.com/116802681592967253904</uri>
+		</author>
+		<gphoto:id>6281653638875239553</gphoto:id>
+		<gphoto:name>6281653638875239553</gphoto:name>
+		<gphoto:location>Nikkey Club Marilia SP-Brazil</gphoto:location>
+		<gphoto:access>public</gphoto:access>
+		<gphoto:timestamp>1462086000000</gphoto:timestamp>
+		<gphoto:numphotos>54</gphoto:numphotos>
+		<gphoto:user>116802681592967253904</gphoto:user>
+		<gphoto:nickname>Wata Watanabe</gphoto:nickname>
+		<media:group>
+			<media:content
+				url='https://lh3.googleusercontent.com/-UTA1Q_aiLII/Vyzqs_My1IE/AAAAAAAAAec/YEbrZRRGVmUUSrXmv9lpO_HyNWQnvgwUwCHMQAQ/6281653638875239553'
+				type='image/jpeg' medium='image'/>
+			<media:credit>Wata Watanabe</media:credit>
+			<media:description type='plain'>Demonstration kihon, idogeiko and kata</media:description>
+			<media:keywords/>
+			<media:thumbnail
+				url='https://lh3.googleusercontent.com/-UTA1Q_aiLII/Vyzqs_My1IE/AAAAAAAAAec/YEbrZRRGVmUUSrXmv9lpO_HyNWQnvgwUwCHMQAQ/s160-c/6281653638875239553'
+				height='160' width='160'/>
+			<media:title type='plain'>UndoKai - May 1, 2016</media:title>
+		</media:group>
+	</entry>
+	 */
+	public static function getPublicAlbuns( $publicAlbumURL ){
+		$url = "http://picasaweb.google.com/data/feed/api/user/".$publicAlbumURL ;
+		/* @var $obj SimpleXMLElement  */
+		$obj = simplexml_load_string( str_replace(array("gphoto:", "media:"), array("gphoto_","media_"), file_get_contents($url) ) ) ;
+		return json_decode( json_encode($obj) );
 	}
-	
+
+
 }
 
 /*
@@ -147,10 +135,11 @@ class ARMPicasaAPI {
  
  USER:
  https://picasaweb.google.com/data/feed/api/user/106459362403726512890
- 
+	http://picasaweb.google.com/data/feed/api/user/116802681592967253904/
  ALBUM:
  https://picasaweb.google.com/data/feed/api/user/106459362403726512890/albumid/5869662296289361873?imgmax=1024
- 
+
+
  VIDEO:
  https://picasaweb.google.com/data/feed/api/user/106459362403726512890/albumid/5869662296289361873/photoid/5869775977866742034
  
@@ -190,7 +179,7 @@ class ARMPicasaAPI {
         ["@attributes"]=>
         array(2) {
           ["type"]=>
-          string(10) "images/jpeg"
+          string(10) "image/jpeg"
           ["src"]=>
           string(101) "https://lh5.googleusercontent.com/-YzFgYw8HtXg/UU4HCIMG9aI/AAAAAAAA4XU/KiBaDSqEmSc/s1024/DSC_0001.JPG"
         }

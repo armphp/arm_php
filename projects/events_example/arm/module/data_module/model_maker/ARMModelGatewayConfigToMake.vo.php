@@ -36,4 +36,8 @@ class ARMModelGatewayConfigToMakeVO extends ARMAutoParseAbstract{
 	 * @var boolean
 	 */
 	public $forceOverride ;
+	/**
+	 * @var bool
+	 */
+	public $downloadZip ;
 }
